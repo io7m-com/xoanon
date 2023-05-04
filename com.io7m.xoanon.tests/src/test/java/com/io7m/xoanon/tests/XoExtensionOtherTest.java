@@ -16,43 +16,34 @@
 
 package com.io7m.xoanon.tests;
 
-import com.io7m.xoanon.extension.XoBotType;
 import com.io7m.xoanon.extension.XoBots;
 import com.io7m.xoanon.extension.XoExtension;
-import com.io7m.xoanon.extension.XoFXThread;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
-import static javafx.scene.input.KeyCode.E;
-import static javafx.scene.input.KeyCode.H;
-import static javafx.scene.input.KeyCode.L;
-import static javafx.scene.input.KeyCode.O;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(XoExtension.class)
-public final class XoExtensionTest
+public final class XoExtensionOtherTest
 {
   private static final Logger LOG =
-    LoggerFactory.getLogger(XoExtensionTest.class);
+    LoggerFactory.getLogger(XoExtensionOtherTest.class);
 
   @Test
   public void testButton(
     final Stage stage)
     throws Exception
   {
-    final var bot = XoBots.createForStage(stage);
+    final var bot =
+      XoBots.createForStage(stage);
 
     final var clicked = new AtomicBoolean(false);
     Platform.runLater(() -> {
@@ -70,57 +61,5 @@ public final class XoExtensionTest
     bot.sleepForFrames(60);
 
     assertTrue(clicked.get());
-  }
-
-  @Test
-  public void testTextField(
-    final Stage stage)
-    throws Exception
-  {
-    final var bot = XoBots.createForStage(stage);
-
-    final var text = new AtomicReference<String>();
-    Platform.runLater(() -> {
-      final var field = new TextField();
-      field.setId("x");
-      field.textProperty()
-        .addListener((observable, oldValue, newValue) -> {
-        text.set(newValue);
-      });
-      stage.setScene(new Scene(field));
-    });
-
-    final var node = bot.findWithId("x");
-    bot.click(node);
-    bot.type(node, H, E, L, L, O);
-    bot.sleepForFrames(60);
-
-    assertEquals("hello", text.get());
-  }
-
-  @Test
-  public void testTextFieldShift(
-    final Stage stage)
-    throws Exception
-  {
-    final var bot = XoBots.createForStage(stage);
-
-    final var text = new AtomicReference<String>();
-    Platform.runLater(() -> {
-      final var field = new TextField();
-      field.setId("x");
-      field.textProperty()
-        .addListener((observable, oldValue, newValue) -> {
-          text.set(newValue);
-        });
-      stage.setScene(new Scene(field));
-    });
-
-    final var node = bot.findWithId("x");
-    bot.click(node);
-    bot.typeWithShift(node, H, E, L, L, O);
-    bot.sleepForFrames(60);
-
-    assertEquals("HELLO", text.get());
   }
 }

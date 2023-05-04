@@ -17,6 +17,9 @@
 package com.io7m.xoanon.extension;
 
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.input.KeyCode;
+import javafx.scene.robot.Robot;
 import javafx.stage.Stage;
 
 /**
@@ -34,6 +37,24 @@ public interface XoBotType
   Stage stage();
 
   /**
+   * Wait for the default stage to close.
+   *
+   * @param milliseconds The time to wait in milliseconds
+   *
+   * @throws Exception On errors
+   */
+
+  void waitForStageToClose(
+    long milliseconds)
+    throws Exception;
+
+  /**
+   * @return The underlying JavaFX roboto
+   */
+
+  Robot robot();
+
+  /**
    * Find the node with the given ID.
    *
    * @param id The ID
@@ -41,10 +62,39 @@ public interface XoBotType
    * @return The node
    *
    * @throws Exception On errors
-   * @see Node#getId()
    */
 
   Node findWithId(String id)
+    throws Exception;
+
+  /**
+   * Find the node with the given text content.
+   *
+   * @param text The text
+   *
+   * @return The node
+   *
+   * @throws Exception On errors
+   */
+
+  Node findWithText(String text)
+    throws Exception;
+
+  /**
+   * Find the node with the given text content, starting at the given parent
+   * node.
+   *
+   * @param parent The parent
+   * @param text   The text
+   *
+   * @return The node
+   *
+   * @throws Exception On errors
+   */
+
+  Node findWithText(
+    Parent parent,
+    String text)
     throws Exception;
 
   /**
@@ -59,16 +109,41 @@ public interface XoBotType
     throws Exception;
 
   /**
-   * Type the given string on the given node.
+   * Type the given key codes on the given node.
    *
-   * @param node The node
-   * @param text The text
+   * @param node  The node
+   * @param codes The codes
    *
    * @throws Exception On errors
    */
 
   void type(
     Node node,
-    String text)
+    KeyCode... codes)
+    throws Exception;
+
+  /**
+   * Type the given key codes on the given node, with the shift key held.
+   *
+   * @param node  The node
+   * @param codes The codes
+   *
+   * @throws Exception On errors
+   */
+
+  void typeWithShift(
+    Node node,
+    KeyCode... codes)
+    throws Exception;
+
+  /**
+   * Do nothing for the given number of JavaFX frames.
+   *
+   * @param frames The frames
+   *
+   * @throws Exception On errors
+   */
+
+  void sleepForFrames(int frames)
     throws Exception;
 }

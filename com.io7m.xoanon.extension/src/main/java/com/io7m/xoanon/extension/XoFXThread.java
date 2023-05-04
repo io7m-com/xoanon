@@ -18,9 +18,13 @@
 package com.io7m.xoanon.extension;
 
 import javafx.application.Platform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Functions to execute code on the JavaFX application thread.
@@ -28,6 +32,9 @@ import java.util.function.Supplier;
 
 public final class XoFXThread
 {
+  private static final Logger LOG =
+    LoggerFactory.getLogger(XoFXThread.class);
+
   private XoFXThread()
   {
 
@@ -44,14 +51,15 @@ public final class XoFXThread
    */
 
   public static <T> CompletableFuture<T> run(
-    final Supplier<T> supplier)
+    final XoFXThreadOperationType<T> supplier)
   {
     final var future = new CompletableFuture<T>();
 
     if (Platform.isFxApplicationThread()) {
       try {
-        future.complete(supplier.get());
+        future.complete(supplier.execute());
       } catch (final Throwable e) {
+        LOG.debug("error: ", e);
         future.completeExceptionally(e);
       }
       return future;
@@ -60,14 +68,40 @@ public final class XoFXThread
     try {
       Platform.runLater(() -> {
         try {
-          future.complete(supplier.get());
+          future.complete(supplier.execute());
         } catch (final Throwable e) {
+          LOG.debug("error: ", e);
           future.completeExceptionally(e);
         }
       });
     } catch (final Throwable e) {
+      LOG.debug("error: ", e);
       future.completeExceptionally(e);
     }
     return future;
+  }
+
+  /**
+   * Run the given code on the FX thread and wait for it to complete.
+   *
+   * @param time     The timeout
+   * @param unit     The timeout unit
+   * @param supplier The code
+   * @param <T>      The type of returned values
+   *
+   * @return The result of the given supplier
+   *
+   * @throws ExecutionException   On errors
+   * @throws InterruptedException On interruption
+   * @throws TimeoutException     On timeouts
+   */
+
+  public static <T> T runAndWait(
+    final long time,
+    final TimeUnit unit,
+    final XoFXThreadOperationType<T> supplier)
+    throws ExecutionException, InterruptedException, TimeoutException
+  {
+    return run(supplier).get(time, unit);
   }
 }
