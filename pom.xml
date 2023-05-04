@@ -127,6 +127,11 @@
         <version>1.1.2</version>
       </dependency>
       <dependency>
+        <groupId>com.io7m.percentpass</groupId>
+        <artifactId>com.io7m.percentpass.extension</artifactId>
+        <version>0.0.2</version>
+      </dependency>
+      <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-api</artifactId>
         <version>5.9.3</version>

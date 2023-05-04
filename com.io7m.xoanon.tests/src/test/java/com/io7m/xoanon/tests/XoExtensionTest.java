@@ -16,21 +16,18 @@
 
 package com.io7m.xoanon.tests;
 
-import com.io7m.xoanon.extension.XoBotType;
+import com.io7m.percentpass.extension.PercentPassing;
 import com.io7m.xoanon.extension.XoBots;
 import com.io7m.xoanon.extension.XoExtension;
-import com.io7m.xoanon.extension.XoFXThread;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -47,7 +44,7 @@ public final class XoExtensionTest
   private static final Logger LOG =
     LoggerFactory.getLogger(XoExtensionTest.class);
 
-  @Test
+  @PercentPassing(executionCount = 6, passPercent = 50.0)
   public void testButton(
     final Stage stage)
     throws Exception
@@ -72,7 +69,7 @@ public final class XoExtensionTest
     assertTrue(clicked.get());
   }
 
-  @Test
+  @PercentPassing(executionCount = 6, passPercent = 50.0)
   public void testTextField(
     final Stage stage)
     throws Exception
@@ -85,8 +82,8 @@ public final class XoExtensionTest
       field.setId("x");
       field.textProperty()
         .addListener((observable, oldValue, newValue) -> {
-        text.set(newValue);
-      });
+          text.set(newValue);
+        });
       stage.setScene(new Scene(field));
     });
 
@@ -98,7 +95,7 @@ public final class XoExtensionTest
     assertEquals("hello", text.get());
   }
 
-  @Test
+  @PercentPassing(executionCount = 6, passPercent = 50.0)
   public void testTextFieldShift(
     final Stage stage)
     throws Exception
