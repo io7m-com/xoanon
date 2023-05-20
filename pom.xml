@@ -13,7 +13,7 @@
 
   <groupId>com.io7m.xoanon</groupId>
   <artifactId>com.io7m.xoanon</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.3-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>com.io7m.xoanon</name>
@@ -26,7 +26,7 @@
   </modules>
 
   <properties>
-    <io7m.api.previousVersion>0.0.2</io7m.api.previousVersion>
+    <io7m.api.previousVersion>0.0.3-SNAPSHOT</io7m.api.previousVersion>
     <org.javafx.version>20.0.1</org.javafx.version>
   </properties>
 
