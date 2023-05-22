@@ -15,7 +15,7 @@
  */
 
 
-package com.io7m.xoanon.extension;
+package com.io7m.xoanon.commander.internal;
 
 import javafx.application.Platform;
 import org.slf4j.Logger;
@@ -103,5 +103,45 @@ public final class XoFXThread
     throws ExecutionException, InterruptedException, TimeoutException
   {
     return run(supplier).get(time, unit);
+  }
+
+  /**
+   * Execute the given runnable on the JavaFX thread. If this is already the
+   * JavaFX thread, execute the runnable directly.
+   *
+   * @param supplier The function
+   *
+   * @return The operation in progress
+   */
+
+  public static CompletableFuture<Void> runV(
+    final Runnable supplier)
+  {
+    return run(() -> {
+      supplier.run();
+      return null;
+    });
+  }
+
+  /**
+   * Execute the given runnable on the JavaFX thread. If this is already the
+   * JavaFX thread, execute the runnable directly.
+   *
+   * @param time     The timeout
+   * @param unit     The timeout unit
+   * @param supplier The code
+   *
+   * @throws ExecutionException   On errors
+   * @throws InterruptedException On interruption
+   * @throws TimeoutException     On timeouts
+   */
+
+  public static void runVWait(
+    final long time,
+    final TimeUnit unit,
+    final Runnable supplier)
+    throws ExecutionException, InterruptedException, TimeoutException
+  {
+    runV(supplier).get(time, unit);
   }
 }

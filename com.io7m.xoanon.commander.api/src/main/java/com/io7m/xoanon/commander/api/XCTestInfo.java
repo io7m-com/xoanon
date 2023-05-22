@@ -14,20 +14,38 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+package com.io7m.xoanon.commander.api;
+
+import java.time.OffsetDateTime;
+import java.util.Objects;
+
 /**
- * JUnit 5 JavaFX extension (Test suite)
+ * Information about a test. A test is expected to be uniquely identified
+ * by the {@link #name()}.
+ *
+ * @param time  The time of the last update
+ * @param name  The (unique) name
+ * @param state The test state
  */
 
-open module com.io7m.xoanon.tests
+public record XCTestInfo(
+  OffsetDateTime time,
+  String name,
+  XCTestState state)
 {
-  requires transitive com.io7m.xoanon.extension;
+  /**
+   * Information about a test. A test is expected to be uniquely identified
+   * by the {@link #name()}.
+   *
+   * @param time  The time of the last update
+   * @param name  The (unique) name
+   * @param state The test state
+   */
 
-  requires com.io7m.percentpass.extension;
-  requires javafx.base;
-  requires javafx.controls;
-  requires org.junit.jupiter.api;
-  requires org.junit.jupiter.engine;
-  requires org.slf4j;
-
-  exports com.io7m.xoanon.tests;
+  public XCTestInfo
+  {
+    Objects.requireNonNull(time, "time");
+    Objects.requireNonNull(name, "name");
+    Objects.requireNonNull(state, "state");
+  }
 }

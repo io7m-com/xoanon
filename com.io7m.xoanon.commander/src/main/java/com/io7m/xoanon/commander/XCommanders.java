@@ -14,25 +14,45 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+package com.io7m.xoanon.commander;
 
-package com.io7m.xoanon.extension;
+import com.io7m.xoanon.commander.api.XCCommanderType;
+import com.io7m.xoanon.commander.internal.XBApplication;
+import javafx.application.Platform;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
- * An operation performed on the FX thread.
- *
- * @param <T> The type of returned values
+ * Functions to boot a commander.
  */
 
-public interface XoFXThreadOperationType<T>
+public final class XCommanders
 {
+  private XCommanders()
+  {
+
+  }
+
   /**
-   * Execute the operation.
+   * Boot a commander, starting up the JavaFX Platform.
    *
-   * @return A value of {@code T}
+   * @return The operation in progress
    *
-   * @throws Exception On errors
+   * @see Platform#startup(Runnable)
    */
 
-  T execute()
-    throws Exception;
+  public static CompletableFuture<XCCommanderType> boot()
+  {
+    final var future = new CompletableFuture<XCCommanderType>();
+    Platform.startup(() -> {
+      try {
+        future.complete(XBApplication.boot());
+      } catch (final Throwable e) {
+        future.completeExceptionally(e);
+      }
+    });
+    return future;
+  }
 }
+
+

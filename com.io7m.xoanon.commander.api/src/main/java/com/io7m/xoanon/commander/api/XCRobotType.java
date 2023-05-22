@@ -14,13 +14,14 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.xoanon.extension;
+package com.io7m.xoanon.commander.api;
 
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.input.KeyCode;
 import javafx.scene.robot.Robot;
 import javafx.stage.Stage;
+
+import java.util.List;
 
 /**
  * A robot that can send events to JavaFX nodes. All methods submit work to the
@@ -28,23 +29,19 @@ import javafx.stage.Stage;
  * that thread.
  */
 
-public interface XoBotType
+public interface XCRobotType
 {
-  /**
-   * @return The stage used for test cases
-   */
-
-  Stage stage();
-
   /**
    * Wait for the default stage to close.
    *
+   * @param stage        The stage
    * @param milliseconds The time to wait in milliseconds
    *
    * @throws Exception On errors
    */
 
   void waitForStageToClose(
+    Stage stage,
     long milliseconds)
     throws Exception;
 
@@ -57,27 +54,33 @@ public interface XoBotType
   /**
    * Find the node with the given ID.
    *
-   * @param id The ID
+   * @param stage The stage within which to search
+   * @param id    The ID
    *
    * @return The node
    *
    * @throws Exception On errors
    */
 
-  Node findWithId(String id)
+  Node findWithId(
+    Stage stage,
+    String id)
     throws Exception;
 
   /**
    * Find the node with the given text content.
    *
-   * @param text The text
+   * @param stage The stage within which to search
+   * @param text  The text
    *
    * @return The node
    *
    * @throws Exception On errors
    */
 
-  Node findWithText(String text)
+  Node findWithText(
+    Stage stage,
+    String text)
     throws Exception;
 
   /**
@@ -101,8 +104,6 @@ public interface XoBotType
    * Click on the given node using the primary mouse button.
    *
    * @param node The node
-   *
-   * @throws Exception On errors
    */
 
   void click(Node node)
@@ -113,27 +114,23 @@ public interface XoBotType
    *
    * @param node  The node
    * @param codes The codes
-   *
-   * @throws Exception On errors
    */
 
   void type(
     Node node,
-    KeyCode... codes)
+    List<XCKey> codes)
     throws Exception;
 
   /**
-   * Type the given key codes on the given node, with the shift key held.
+   * Type text on the given node.
    *
-   * @param node  The node
-   * @param codes The codes
-   *
-   * @throws Exception On errors
+   * @param node The node
+   * @param text The text
    */
 
-  void typeWithShift(
+  void typeText(
     Node node,
-    KeyCode... codes)
+    String text)
     throws Exception;
 
   /**
@@ -146,4 +143,9 @@ public interface XoBotType
 
   void sleepForFrames(int frames)
     throws Exception;
+
+  /**
+   * Release all keys, and all mouse buttons.
+   */
+  void reset();
 }

@@ -14,11 +14,25 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
+package com.io7m.xoanon.commander.internal;
+
 /**
- * JUnit 5 JavaFX extension (Extension)
+ * An operation performed on the FX thread.
+ *
+ * @param <T> The type of returned values
  */
 
-@Version("1.0.0")
-package com.io7m.xoanon.extension.internal;
+public interface XoFXThreadOperationType<T>
+{
+  /**
+   * Execute the operation.
+   *
+   * @return A value of {@code T}
+   *
+   * @throws Exception On errors
+   */
 
-import org.osgi.annotation.versioning.Version;
+  T execute()
+    throws Exception;
+}

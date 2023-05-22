@@ -14,6 +14,8 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import org.junit.platform.launcher.LauncherSessionListener;
+
 /**
  * JUnit 5 JavaFX extension (Extension)
  */
@@ -23,10 +25,18 @@ module com.io7m.xoanon.extension
   requires static org.osgi.annotation.bundle;
   requires static org.osgi.annotation.versioning;
 
+  requires transitive org.junit.platform.launcher;
   requires transitive org.junit.jupiter.api;
   requires transitive javafx.base;
   requires transitive javafx.controls;
+
+  requires com.io7m.xoanon.commander;
+  requires com.io7m.xoanon.commander.api;
+
   requires org.slf4j;
+
+  provides LauncherSessionListener
+    with com.io7m.xoanon.extension.XoExtension;
 
   exports com.io7m.xoanon.extension;
 }

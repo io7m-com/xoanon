@@ -14,20 +14,38 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+package com.io7m.xoanon.commander.api;
+
+import javafx.scene.input.KeyCode;
+
+import java.util.Objects;
+
 /**
- * JUnit 5 JavaFX extension (Test suite)
+ * A specific key.
+ *
+ * @param code      The key code
+ * @param isShift   Is shift held down?
+ * @param isAlt     Is alt held down?
+ * @param isControl Is control held down?
  */
 
-open module com.io7m.xoanon.tests
+public record XCKey(
+  KeyCode code,
+  boolean isShift,
+  boolean isAlt,
+  boolean isControl)
 {
-  requires transitive com.io7m.xoanon.extension;
+  /**
+   * A specific key.
+   *
+   * @param code      The key code
+   * @param isShift   Is shift held down?
+   * @param isAlt     Is alt held down?
+   * @param isControl Is control held down?
+   */
 
-  requires com.io7m.percentpass.extension;
-  requires javafx.base;
-  requires javafx.controls;
-  requires org.junit.jupiter.api;
-  requires org.junit.jupiter.engine;
-  requires org.slf4j;
-
-  exports com.io7m.xoanon.tests;
+  public XCKey
+  {
+    Objects.requireNonNull(code, "code");
+  }
 }

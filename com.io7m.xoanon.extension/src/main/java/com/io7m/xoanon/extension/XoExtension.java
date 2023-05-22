@@ -16,10 +16,13 @@
 
 package com.io7m.xoanon.extension;
 
+import com.io7m.xoanon.commander.XCommanders;
+import com.io7m.xoanon.commander.api.XCCommanderType;
+import com.io7m.xoanon.commander.api.XCTestInfo;
+import com.io7m.xoanon.commander.api.XCTestState;
+import com.io7m.xoanon.commander.api.XCRobotType;
+import com.io7m.xoanon.commander.api.XCKeyMap;
 import javafx.application.Platform;
-import javafx.scene.robot.Robot;
-import javafx.stage.Stage;
-import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -27,16 +30,28 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.jupiter.api.extension.TestWatcher;
+import org.junit.platform.launcher.LauncherSession;
+import org.junit.platform.launcher.LauncherSessionListener;
+import org.junit.platform.launcher.TestExecutionListener;
+import org.junit.platform.launcher.TestIdentifier;
+import org.junit.platform.launcher.TestPlan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+
+import static com.io7m.xoanon.commander.api.XCTestState.FAILED;
+import static com.io7m.xoanon.commander.api.XCTestState.INITIAL;
+import static com.io7m.xoanon.commander.api.XCTestState.SUCCEEDED;
+import static org.junit.platform.engine.TestDescriptor.Type.CONTAINER;
+import static org.junit.platform.engine.TestDescriptor.Type.CONTAINER_AND_TEST;
+import static org.junit.platform.engine.TestDescriptor.Type.TEST;
 
 /**
  * A simple JavaFX extension for JUnit 5 tests.
@@ -44,19 +59,23 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public final class XoExtension
   implements BeforeAllCallback,
-  AfterAllCallback,
   BeforeEachCallback,
   AfterEachCallback,
-  ParameterResolver
+  ParameterResolver,
+  TestWatcher,
+  LauncherSessionListener,
+  TestExecutionListener
 {
   private static final AtomicBoolean FX_PLATFORM_STARTED =
     new AtomicBoolean(false);
 
-  private final ConcurrentLinkedQueue<Stage> createdStages =
-    new ConcurrentLinkedQueue<>();
+  private static XCCommanderType COMMANDER;
 
   private static final Logger LOG =
     LoggerFactory.getLogger(XoExtension.class);
+
+  private static final ArrayList<TestIdentifier> TESTS_EXPECTED =
+    new ArrayList<>();
 
   /**
    * A simple JavaFX extension for JUnit 5 tests.
@@ -68,36 +87,66 @@ public final class XoExtension
   }
 
   @Override
-  public void beforeAll(
-    final ExtensionContext context)
-    throws InterruptedException
+  public void launcherSessionOpened(
+    final LauncherSession session)
   {
-    final var latch = new CountDownLatch(1);
-    if (FX_PLATFORM_STARTED.compareAndSet(false, true)) {
-      LOG.trace("starting JavaFX platform");
-      Platform.setImplicitExit(false);
-      Platform.startup(latch::countDown);
-      LOG.trace("waiting for JavaFX platform to start");
-      latch.await(1L, TimeUnit.MINUTES);
-      LOG.trace("JavaFX platform started");
-    } else {
-      Platform.runLater(latch::countDown);
-      LOG.trace("waiting for JavaFX platform to restore");
-      latch.await(1L, TimeUnit.MINUTES);
-      LOG.trace("JavaFX platform restored");
+    /*
+     * Register a test execution listener so that the commander can be
+     * shut down exactly once after all the tests have executed.
+     */
+
+    session.getLauncher()
+      .registerTestExecutionListeners(this);
+  }
+
+  @Override
+  public void testPlanExecutionStarted(
+    final TestPlan testPlan)
+  {
+    testPlan.countTestIdentifiers(p -> {
+      return switch (p.getType()) {
+        case CONTAINER -> {
+          yield false;
+        }
+        case TEST, CONTAINER_AND_TEST -> {
+          TESTS_EXPECTED.add(p);
+          yield true;
+        }
+      };
+    });
+  }
+
+  @Override
+  public void testPlanExecutionFinished(
+    final TestPlan testPlan)
+  {
+    try {
+      COMMANDER.close();
+    } catch (final Exception e) {
+      LOG.error("close: ", e);
     }
   }
 
   @Override
-  public void afterAll(
+  public void beforeAll(
     final ExtensionContext context)
-    throws InterruptedException
+    throws Exception
   {
-    final var latch = new CountDownLatch(1);
-    Platform.runLater(latch::countDown);
+    if (FX_PLATFORM_STARTED.compareAndSet(false, true)) {
+      LOG.trace("starting JavaFX platform");
+      Platform.setImplicitExit(false);
+      COMMANDER = XCommanders.boot().get(30L, TimeUnit.SECONDS);
+      Thread.sleep(2_000L);
+      COMMANDER.setTestCount(Integer.toUnsignedLong(TESTS_EXPECTED.size()));
 
-    LOG.trace("waiting for JavaFX platform to settle");
-    latch.await(3L, TimeUnit.SECONDS);
+      TESTS_EXPECTED.forEach(identifier -> {
+        COMMANDER.setTestState(new XCTestInfo(
+          OffsetDateTime.now(),
+          identifier.getUniqueId(),
+          INITIAL
+        ));
+      });
+    }
   }
 
   @Override
@@ -109,7 +158,9 @@ public final class XoExtension
     final var requiredType =
       parameterContext.getParameter().getType();
 
-    return Objects.equals(requiredType, Stage.class);
+    return Objects.equals(requiredType, XCCommanderType.class)
+      || Objects.equals(requiredType, XCKeyMap.class)
+      || Objects.equals(requiredType, XCRobotType.class);
   }
 
   @Override
@@ -121,9 +172,25 @@ public final class XoExtension
     final var requiredType =
       parameterContext.getParameter().getType();
 
-    if (Objects.equals(requiredType, Stage.class)) {
+    if (Objects.equals(requiredType, XCCommanderType.class)) {
       try {
-        return this.createStage(extensionContext);
+        return COMMANDER;
+      } catch (final Exception e) {
+        throw new ParameterResolutionException(e.getMessage(), e);
+      }
+    }
+
+    if (Objects.equals(requiredType, XCKeyMap.class)) {
+      try {
+        return COMMANDER.keyMap().get(10L, TimeUnit.SECONDS);
+      } catch (final Exception e) {
+        throw new ParameterResolutionException(e.getMessage(), e);
+      }
+    }
+
+    if (Objects.equals(requiredType, XCRobotType.class)) {
+      try {
+        return COMMANDER.robot().get(10L, TimeUnit.SECONDS);
       } catch (final Exception e) {
         throw new ParameterResolutionException(e.getMessage(), e);
       }
@@ -134,70 +201,97 @@ public final class XoExtension
     );
   }
 
-  private Stage createStage(
-    final ExtensionContext context)
-    throws Exception
-  {
-    final var stageRef = new AtomicReference<Stage>();
-
-    XoFXThread.run(() -> {
-      final var stage = new Stage();
-      this.createdStages.add(stage);
-
-      stage.setMinWidth(320.0);
-      stage.setMinHeight(240.0);
-      stage.setMaxWidth(3000.0);
-      stage.setMaxHeight(3000.0);
-      stage.setTitle(context.getDisplayName());
-      stage.show();
-      stageRef.set(stage);
-      return null;
-    }).get(1L, TimeUnit.SECONDS);
-
-    /*
-     * Wait for the window to open, and then reset the mouse cursor so that
-     * it is in the middle of the window.
-     */
-
-    Thread.sleep(100L);
-
-    XoFXThread.run(() -> {
-      final var stage = stageRef.get();
-      final var x = stage.getX() + (stage.getWidth() / 2.0);
-      final var y = stage.getY() + (stage.getHeight() / 2.0);
-
-      LOG.trace("resetting mouse to {}x{}", x, y);
-      final var robot = new Robot();
-      robot.mouseMove(x, y);
-      return null;
-    }).get(1L, TimeUnit.SECONDS);
-
-    return Objects.requireNonNull(stageRef.get(), "Stage");
-  }
-
   @Override
   public void afterEach(
     final ExtensionContext context)
     throws Exception
   {
-    XoFXThread.run(() -> {
-      final var windows = List.copyOf(this.createdStages);
-      for (final var window : windows) {
-        try {
-          window.close();
-        } catch (final Throwable e) {
-          LOG.error("close: {} ({}): ", window, window.getTitle(), e);
-        }
-      }
-      return null;
-    }).get(5L, TimeUnit.SECONDS);
+    /*
+     * It's possible for tests to leave the current key and mouse state
+     * in a mess. Explicitly reset both the mouse and all keys.
+     */
+
+    try {
+      final var bot =
+        COMMANDER.robot().get(5L, TimeUnit.SECONDS);
+      bot.reset();
+    } catch (final Exception e) {
+      LOG.error("error resetting input: ", e);
+    }
+
+    /*
+     * Close any and all stages the test may have opened.
+     */
+
+    COMMANDER.stageCloseAll()
+      .get(5L, TimeUnit.SECONDS);
+  }
+
+  @Override
+  public void testDisabled(
+    final ExtensionContext context,
+    final Optional<String> reason)
+  {
+    COMMANDER.setTestState(
+      new XCTestInfo(
+        OffsetDateTime.now(),
+        context.getUniqueId(),
+        SUCCEEDED
+      )
+    );
+  }
+
+  @Override
+  public void testSuccessful(
+    final ExtensionContext context)
+  {
+    COMMANDER.setTestState(
+      new XCTestInfo(
+        OffsetDateTime.now(),
+        context.getUniqueId(),
+        SUCCEEDED
+      )
+    );
+  }
+
+  @Override
+  public void testAborted(
+    final ExtensionContext context,
+    final Throwable cause)
+  {
+    COMMANDER.setTestState(
+      new XCTestInfo(
+        OffsetDateTime.now(),
+        context.getUniqueId(),
+        FAILED
+      )
+    );
+  }
+
+  @Override
+  public void testFailed(
+    final ExtensionContext context,
+    final Throwable cause)
+  {
+    COMMANDER.setTestState(
+      new XCTestInfo(
+        OffsetDateTime.now(),
+        context.getUniqueId(),
+        FAILED
+      )
+    );
   }
 
   @Override
   public void beforeEach(
     final ExtensionContext context)
-    throws Exception
   {
-
+    COMMANDER.setTestState(
+      new XCTestInfo(
+        OffsetDateTime.now(),
+        context.getUniqueId(),
+        XCTestState.RUNNING
+      )
+    );
   }
 }

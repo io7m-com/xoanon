@@ -15,40 +15,20 @@
  */
 
 
-package com.io7m.xoanon.extension;
+package com.io7m.xoanon.commander.api;
 
-import com.io7m.xoanon.extension.internal.XoBot;
-import javafx.stage.Stage;
-
-import java.util.concurrent.TimeUnit;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Functions to create robots.
+ * An annotation that indicates that a method can be called on any thread.
  */
 
-public final class XoBots
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.SOURCE)
+public @interface XCAnyThread
 {
-  private XoBots()
-  {
 
-  }
-
-  /**
-   * Create a new robot for the given stage.
-   *
-   * @param stage The stage
-   *
-   * @return A new robot
-   *
-   * @throws Exception On errors
-   */
-
-  public static XoBotType createForStage(
-    final Stage stage)
-    throws Exception
-  {
-    return XoFXThread.run(() -> {
-      return new XoBot(stage);
-    }).get(1L, TimeUnit.SECONDS);
-  }
 }
