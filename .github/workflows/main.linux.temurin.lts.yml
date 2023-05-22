@@ -32,4 +32,4 @@ jobs:
       - name: Coverage
         uses: codecov/codecov-action@v1
         with:
-          file: com.io7m.xoanon.tests/target/site/jacoco/jacoco.xml
+          file: com.io7m.xoanon.tests/target/site/jacoco-aggregate/jacoco.xml
