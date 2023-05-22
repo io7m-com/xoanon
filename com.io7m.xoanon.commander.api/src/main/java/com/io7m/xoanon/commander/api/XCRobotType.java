@@ -68,6 +68,28 @@ public interface XCRobotType
     throws Exception;
 
   /**
+   * Find the node with the given ID, casting it to {@code T}.
+   *
+   * @param <T>   The type of node
+   * @param clazz The class
+   * @param stage The stage within which to search
+   * @param id    The ID
+   *
+   * @return The node
+   *
+   * @throws Exception On errors
+   */
+
+  default <T extends Node> T findWithId(
+    final Class<T> clazz,
+    final Stage stage,
+    final String id)
+    throws Exception
+  {
+    return clazz.cast(this.findWithId(stage, id));
+  }
+
+  /**
    * Find the node with the given text content.
    *
    * @param stage The stage within which to search
@@ -82,6 +104,28 @@ public interface XCRobotType
     Stage stage,
     String text)
     throws Exception;
+
+  /**
+   * Find the node with the given text content, casting it to {@code T}.
+   *
+   * @param <T>   The type of node
+   * @param clazz The class
+   * @param stage The stage within which to search
+   * @param text  The text
+   *
+   * @return The node
+   *
+   * @throws Exception On errors
+   */
+
+  default <T extends Node> T findWithText(
+    final Class<T> clazz,
+    final Stage stage,
+    final String text)
+    throws Exception
+  {
+    return clazz.cast(this.findWithText(stage, text));
+  }
 
   /**
    * Find the node with the given text content, starting at the given parent
@@ -99,6 +143,29 @@ public interface XCRobotType
     Parent parent,
     String text)
     throws Exception;
+
+  /**
+   * Find the node with the given text content, starting at the given parent
+   * node.
+   *
+   * @param <T>    The type of node
+   * @param clazz  The class
+   * @param parent The parent
+   * @param text   The text
+   *
+   * @return The node
+   *
+   * @throws Exception On errors
+   */
+
+  default <T extends Node> T findWithText(
+    final Class<T> clazz,
+    final Parent parent,
+    final String text)
+    throws Exception
+  {
+    return clazz.cast(this.findWithText(parent, text));
+  }
 
   /**
    * Click on the given node using the primary mouse button.
