@@ -30,11 +30,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.NoSuchElementException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(XoExtension.class)
@@ -94,6 +98,56 @@ public final class XoExtensionTest
     bot.typeText(node, "Hello!");
 
     assertEquals("Hello!", text.get());
+  }
+
+  @Test
+  public void testTextFieldTextFind(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var text =
+      new AtomicReference<String>();
+
+    commander.stageNewAndWait(newStage -> {
+      final var field = new TextField();
+      field.setId("x");
+      field.textProperty()
+        .addListener((observable, oldValue, newValue) -> {
+          text.set(newValue);
+        });
+      newStage.setScene(new Scene(field));
+    });
+
+    final var node = bot.findWithIdInAnyStage("x");
+    bot.click(node);
+    bot.typeText(node, "Hello!");
+
+    assertEquals("Hello!", text.get());
+  }
+
+  @Test
+  public void testTextFieldTextFindNonexistentId(
+    final XCRobotType bot)
+  {
+    final var ex =
+      assertThrows(ExecutionException.class, () -> {
+        bot.findWithIdInAnyStage("x");
+      });
+
+    assertInstanceOf(NoSuchElementException.class, ex.getCause());
+  }
+
+  @Test
+  public void testTextFieldTextFindNonexistentText(
+    final XCRobotType bot)
+  {
+    final var ex =
+      assertThrows(ExecutionException.class, () -> {
+        bot.findWithTextInAnyStage("Clearly does not exist.");
+      });
+
+    assertInstanceOf(NoSuchElementException.class, ex.getCause());
   }
 
   @Test

@@ -26,11 +26,25 @@ import java.util.List;
 /**
  * A robot that can send events to JavaFX nodes. All methods submit work to the
  * JavaFX application thread, and block until the operations have completed on
- * that thread.
+ * that thread (up to a configurable timeout value).
  */
 
 public interface XCRobotType
 {
+  /**
+   * @return The current timeout value in milliseconds
+   */
+
+  long timeoutMilliseconds();
+
+  /**
+   * Set the current timeout value in milliseconds.
+   *
+   * @param ms The number of milliseconds
+   */
+
+  void setTimeoutMilliseconds(long ms);
+
   /**
    * Wait for the default stage to close.
    *
@@ -50,6 +64,41 @@ public interface XCRobotType
    */
 
   Robot robot();
+
+  /**
+   * Find the node with the given ID by searching through all open stages.
+   *
+   * @param id The ID
+   *
+   * @return The node
+   *
+   * @throws Exception On errors
+   */
+
+  Node findWithIdInAnyStage(
+    String id)
+    throws Exception;
+
+  /**
+   * Find the node with the given ID by searching through all open stages,
+   * casting it to {@code T}.
+   *
+   * @param <T>   The type of node
+   * @param clazz The class
+   * @param id    The ID
+   *
+   * @return The node
+   *
+   * @throws Exception On errors
+   */
+
+  default <T extends Node> T findWithIdInAnyStage(
+    final Class<T> clazz,
+    final String id)
+    throws Exception
+  {
+    return clazz.cast(this.findWithIdInAnyStage(id));
+  }
 
   /**
    * Find the node with the given ID.
@@ -87,6 +136,42 @@ public interface XCRobotType
     throws Exception
   {
     return clazz.cast(this.findWithId(stage, id));
+  }
+
+
+  /**
+   * Find the node with the given text content in any open stage.
+   *
+   * @param text The text
+   *
+   * @return The node
+   *
+   * @throws Exception On errors
+   */
+
+  Node findWithTextInAnyStage(
+    String text)
+    throws Exception;
+
+  /**
+   * Find the node with the given text content in any open stage, casting
+   * it to {@code T}.
+   *
+   * @param <T>   The type of node
+   * @param clazz The class
+   * @param text  The text
+   *
+   * @return The node
+   *
+   * @throws Exception On errors
+   */
+
+  default <T extends Node> T findWithTextInAnyStage(
+    final Class<T> clazz,
+    final String text)
+    throws Exception
+  {
+    return clazz.cast(this.findWithTextInAnyStage(text));
   }
 
   /**
