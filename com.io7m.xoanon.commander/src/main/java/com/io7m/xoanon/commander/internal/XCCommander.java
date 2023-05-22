@@ -125,6 +125,7 @@ public final class XCCommander
   private volatile long testsTotal;
   private volatile long testsIndex;
   private volatile long testsFailed;
+
   @FXML private TextArea input;
   @FXML private TextField status;
   @FXML private Parent splash;
@@ -150,6 +151,7 @@ public final class XCCommander
   @FXML private TextField dataTestsExecuted;
   @FXML private TextField dataTestsFailed;
   @FXML private TextField dataExecutionId;
+  @FXML private TextField dataCurrentTestId;
   @FXML private Label heapText;
   @FXML private ProgressBar heapUsed;
 
@@ -453,6 +455,7 @@ public final class XCCommander
       }
 
       this.testCountDisplaysUpdate();
+      this.dataCurrentTestId.setText(test.id());
       this.status.setText("%s %s".formatted(test.name(), test.state()));
 
       switch (this.testsStateWorst) {
@@ -471,12 +474,12 @@ public final class XCCommander
       final var newList =
         this.tests.getItems()
           .stream()
-          .filter(t -> !Objects.equals(t.name(), test.name()))
+          .filter(t -> !Objects.equals(t.id(), test.id()))
           .collect(Collectors.toCollection(ArrayList::new));
 
       newList.add(test);
       newList.sort(Comparator.comparing(XCTestInfo::time).reversed());
-      this.testsList.setAll(newList);
+      this.testsList.setAll(newList.stream().limit(40L).toList());
     });
   }
 
@@ -640,6 +643,10 @@ public final class XCCommander
       Thread.sleep(250L);
 
       Platform.runLater(() -> {
+        this.input.setDisable(false);
+      });
+
+      Platform.runLater(() -> {
         this.status.setText("Generating keymap...");
       });
 
@@ -745,6 +752,14 @@ public final class XCCommander
       Platform.requestNextPulse();
       Platform.runLater(() -> {
         this.status.setText("Generated keymap.");
+      });
+
+      Platform.runLater(() -> {
+        this.input.clear();
+      });
+
+      Platform.runLater(() -> {
+        this.input.setDisable(true);
       });
 
       final var latch = new CountDownLatch(1);

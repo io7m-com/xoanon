@@ -21,30 +21,34 @@ import java.util.Objects;
 
 /**
  * Information about a test. A test is expected to be uniquely identified
- * by the {@link #name()}.
+ * by the {@link #id()}.
  *
  * @param time  The time of the last update
- * @param name  The (unique) name
+ * @param id    The unique test ID
+ * @param name  The display name
  * @param state The test state
  */
 
 public record XCTestInfo(
   OffsetDateTime time,
+  String id,
   String name,
   XCTestState state)
 {
   /**
    * Information about a test. A test is expected to be uniquely identified
-   * by the {@link #name()}.
+   * by the {@link #id()}.
    *
    * @param time  The time of the last update
-   * @param name  The (unique) name
+   * @param id    The unique test ID
+   * @param name  The display name
    * @param state The test state
    */
 
   public XCTestInfo
   {
     Objects.requireNonNull(time, "time");
+    Objects.requireNonNull(id, "id");
     Objects.requireNonNull(name, "name");
     Objects.requireNonNull(state, "state");
   }

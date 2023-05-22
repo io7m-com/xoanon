@@ -85,15 +85,15 @@ public final class DemoMain
       cmd.setTestCount(names.size());
 
       for (final var name : names) {
-        cmd.setTestState(new XCTestInfo(now(), name, INITIAL));
+        cmd.setTestState(new XCTestInfo(now(), name, name, INITIAL));
         Thread.sleep(100L);
-        cmd.setTestState(new XCTestInfo(now(), name, RUNNING));
+        cmd.setTestState(new XCTestInfo(now(), name, name, RUNNING));
         Thread.sleep(250L);
 
         if (rng.nextBoolean()) {
-          cmd.setTestState(new XCTestInfo(now(), name, FAILED));
+          cmd.setTestState(new XCTestInfo(now(), name, name, FAILED));
         } else {
-          cmd.setTestState(new XCTestInfo(now(), name, SUCCEEDED));
+          cmd.setTestState(new XCTestInfo(now(), name, name, SUCCEEDED));
         }
       }
 

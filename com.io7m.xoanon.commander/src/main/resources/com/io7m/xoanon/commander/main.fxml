@@ -96,7 +96,7 @@
                                           <Label fx:id="heapText" text="heapUsed" />
                                           <ProgressBar fx:id="heapUsed" maxWidth="1.7976931348623157E308" prefHeight="16.0" progress="0.0">
                                              <VBox.margin>
-                                                <Insets bottom="4.0" top="8.0" />
+                                                <Insets top="8.0" />
                                              </VBox.margin>
                                           </ProgressBar>
                                        </children>
@@ -162,6 +162,14 @@
                               <Insets top="8.0" />
                            </VBox.margin>
                         </HBox>
+                        <TextField fx:id="dataCurrentTestId" editable="false" focusTraversable="false" prefHeight="24.0">
+                           <VBox.margin>
+                              <Insets top="8.0" />
+                           </VBox.margin>
+                           <font>
+                              <Font name="Monospaced Regular" size="11.0" />
+                           </font>
+                        </TextField>
                         <ListView fx:id="tests" VBox.vgrow="ALWAYS">
                            <VBox.margin>
                               <Insets top="16.0" />

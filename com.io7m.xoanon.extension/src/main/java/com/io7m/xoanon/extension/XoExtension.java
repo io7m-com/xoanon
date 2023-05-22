@@ -143,6 +143,7 @@ public final class XoExtension
         COMMANDER.setTestState(new XCTestInfo(
           OffsetDateTime.now(),
           identifier.getUniqueId(),
+          identifier.getDisplayName(),
           INITIAL
         ));
       });
@@ -236,6 +237,7 @@ public final class XoExtension
       new XCTestInfo(
         OffsetDateTime.now(),
         context.getUniqueId(),
+        context.getDisplayName(),
         SUCCEEDED
       )
     );
@@ -249,6 +251,7 @@ public final class XoExtension
       new XCTestInfo(
         OffsetDateTime.now(),
         context.getUniqueId(),
+        context.getDisplayName(),
         SUCCEEDED
       )
     );
@@ -263,6 +266,7 @@ public final class XoExtension
       new XCTestInfo(
         OffsetDateTime.now(),
         context.getUniqueId(),
+        context.getDisplayName(),
         FAILED
       )
     );
@@ -277,6 +281,7 @@ public final class XoExtension
       new XCTestInfo(
         OffsetDateTime.now(),
         context.getUniqueId(),
+        context.getDisplayName(),
         FAILED
       )
     );
@@ -290,6 +295,7 @@ public final class XoExtension
       new XCTestInfo(
         OffsetDateTime.now(),
         context.getUniqueId(),
+        context.getDisplayName(),
         XCTestState.RUNNING
       )
     );
