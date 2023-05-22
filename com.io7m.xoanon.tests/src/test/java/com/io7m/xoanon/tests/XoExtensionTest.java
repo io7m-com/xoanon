@@ -18,16 +18,19 @@ package com.io7m.xoanon.tests;
 
 import com.io7m.percentpass.extension.PercentPassing;
 import com.io7m.xoanon.commander.api.XCCommanderType;
+import com.io7m.xoanon.commander.api.XCFXThread;
 import com.io7m.xoanon.commander.api.XCRobotType;
 import com.io7m.xoanon.extension.XoExtension;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -91,5 +94,20 @@ public final class XoExtensionTest
     bot.typeText(node, "Hello!");
 
     assertEquals("Hello!", text.get());
+  }
+
+  @Test
+  public void testStage(
+    final XCCommanderType commander)
+    throws Exception
+  {
+    XCFXThread.runVWait(1L, TimeUnit.SECONDS, () -> {
+      final var stage = new Stage();
+      commander.stageRegisterForClosing(stage);
+
+      stage.setWidth(640.0);
+      stage.setHeight(640.0);
+      stage.show();
+    });
   }
 }

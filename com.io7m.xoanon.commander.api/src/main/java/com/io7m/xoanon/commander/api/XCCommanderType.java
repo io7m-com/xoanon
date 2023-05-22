@@ -84,6 +84,16 @@ public interface XCCommanderType extends AutoCloseable
   CompletableFuture<Stage> stageNew(Consumer<Stage> onCreate);
 
   /**
+   * Register a stage for closing by {@link #stageCloseAll()}. This
+   * is implicitly called by {@link #stageNew(Consumer)}.
+   *
+   * @param stage The stage
+   */
+
+  @XCOnAnyThread
+  void stageRegisterForClosing(Stage stage);
+
+  /**
    * Create a new stage, initializing it using the given function.
    *
    * @param onCreate The initialization function

@@ -236,16 +236,10 @@ public final class XCCommander
     return Set.copyOf(codes);
   }
 
-  private static boolean isAllowedKeyCode(
-    final KeyCode code)
-  {
-    return ALL_KEY_CODES.contains(code);
-  }
-
   private static void pause()
   {
     try {
-      Thread.sleep(1L * 16L);
+      Thread.sleep(2L * 16L);
     } catch (final InterruptedException e) {
       Thread.currentThread().interrupt();
     }
@@ -544,12 +538,7 @@ public final class XCCommander
         newStage.show();
         newStage.toFront();
 
-        ++this.stagesCreatedCount;
-        this.dataStagesCreated.setText(
-          Integer.toString(this.stagesCreatedCount)
-        );
-        this.stagesCreated.add(newStage);
-
+        this.stageRegister(newStage);
         onCreate.accept(newStage);
         return newStage;
       });
@@ -568,6 +557,23 @@ public final class XCCommander
       }
     }, 100L, TimeUnit.MILLISECONDS);
     return future;
+  }
+
+  @Override
+  public void stageRegisterForClosing(
+    final Stage newStage)
+  {
+    Platform.runLater(() -> this.stageRegister(newStage));
+  }
+
+  private void stageRegister(
+    final Stage newStage)
+  {
+    ++this.stagesCreatedCount;
+    this.dataStagesCreated.setText(
+      Integer.toString(this.stagesCreatedCount)
+    );
+    this.stagesCreated.add(newStage);
   }
 
   @Override
@@ -631,6 +637,8 @@ public final class XCCommander
     throws Exception
   {
     try {
+      Thread.sleep(250L);
+
       Platform.runLater(() -> {
         this.status.setText("Generating keymap...");
       });
@@ -777,6 +785,4 @@ public final class XCCommander
     this.input.setFocusTraversable(false);
     this.input.setMouseTransparent(true);
   }
-
-
 }
