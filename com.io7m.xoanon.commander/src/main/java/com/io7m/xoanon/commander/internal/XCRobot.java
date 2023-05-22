@@ -281,14 +281,13 @@ public final class XCRobot implements XCRobotType
           .toList();
 
       for (final var window : windows) {
-        final var scene =
-          window.getScene();
-        final var root =
-          scene.getRoot();
-
-        final var result = root.lookup("#" + id);
-        if (result != null) {
-          return result;
+        final var scene = window.getScene();
+        if (scene != null) {
+          final var root = scene.getRoot();
+          final var result = root.lookup("#" + id);
+          if (result != null) {
+            return result;
+          }
         }
       }
 
@@ -335,14 +334,13 @@ public final class XCRobot implements XCRobotType
           .toList();
 
       for (final var window : windows) {
-        final var scene =
-          window.getScene();
-        final var root =
-          scene.getRoot();
-
-        final var result = findWithTextSearch(root, text);
-        if (result != null) {
-          return result;
+        final var scene = window.getScene();
+        if (scene != null) {
+          final var root = scene.getRoot();
+          final var result = findWithTextSearch(root, text);
+          if (result != null) {
+            return result;
+          }
         }
       }
 
