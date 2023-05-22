@@ -104,9 +104,22 @@ public interface XCRobotType
    * Click on the given node using the primary mouse button.
    *
    * @param node The node
+   *
+   * @throws Exception On errors
    */
 
   void click(Node node)
+    throws Exception;
+
+  /**
+   * Point the mouse cursor at the given node.
+   *
+   * @param node The node
+   *
+   * @throws Exception On errors
+   */
+
+  void pointAt(Node node)
     throws Exception;
 
   /**
@@ -114,6 +127,8 @@ public interface XCRobotType
    *
    * @param node  The node
    * @param codes The codes
+   *
+   * @throws Exception On errors
    */
 
   void type(
@@ -126,6 +141,8 @@ public interface XCRobotType
    *
    * @param node The node
    * @param text The text
+   *
+   * @throws Exception On errors
    */
 
   void typeText(

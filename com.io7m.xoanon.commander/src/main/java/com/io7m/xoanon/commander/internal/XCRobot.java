@@ -334,6 +334,20 @@ public final class XCRobot implements XCRobotType
     pause();
   }
 
+  @Override
+  public void pointAt(
+    final Node node)
+    throws Exception
+  {
+    Platform.runLater(() -> opBringStageToFront(node));
+    next();
+
+    XCFXThread.runVWait(1L, SECONDS, () -> this.opPointMouseAt(node));
+    next();
+
+    pause();
+  }
+
   private static void pause()
   {
     try {
