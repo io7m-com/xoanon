@@ -53,12 +53,13 @@ import java.net.URL;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -74,7 +75,27 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static javafx.animation.Interpolator.LINEAR;
+import static javafx.scene.input.KeyCode.AMPERSAND;
+import static javafx.scene.input.KeyCode.ASTERISK;
+import static javafx.scene.input.KeyCode.BACK_QUOTE;
+import static javafx.scene.input.KeyCode.BACK_SLASH;
+import static javafx.scene.input.KeyCode.BRACELEFT;
+import static javafx.scene.input.KeyCode.BRACERIGHT;
+import static javafx.scene.input.KeyCode.CLOSE_BRACKET;
+import static javafx.scene.input.KeyCode.COLON;
+import static javafx.scene.input.KeyCode.COMMA;
+import static javafx.scene.input.KeyCode.DOLLAR;
+import static javafx.scene.input.KeyCode.EXCLAMATION_MARK;
+import static javafx.scene.input.KeyCode.MINUS;
+import static javafx.scene.input.KeyCode.OPEN_BRACKET;
+import static javafx.scene.input.KeyCode.PERIOD;
+import static javafx.scene.input.KeyCode.PLUS;
+import static javafx.scene.input.KeyCode.POUND;
+import static javafx.scene.input.KeyCode.QUOTE;
+import static javafx.scene.input.KeyCode.QUOTEDBL;
+import static javafx.scene.input.KeyCode.SEMICOLON;
 import static javafx.scene.input.KeyCode.SHIFT;
+import static javafx.scene.input.KeyCode.SLASH;
 
 /**
  * The main commander.
@@ -83,11 +104,11 @@ import static javafx.scene.input.KeyCode.SHIFT;
 public final class XCCommander
   implements XCCommanderType, Initializable
 {
-  private static final KeyCode[] ALL_KEY_CODES =
-    KeyCode.values();
-
   private static final Logger LOG =
     LoggerFactory.getLogger(XCCommander.class);
+
+  private static final Set<KeyCode> ALL_KEY_CODES =
+    generateAllAllowedKeyCodes();
 
   private final ScheduledExecutorService executor;
   private final XBStrings strings;
@@ -104,7 +125,6 @@ public final class XCCommander
   private volatile long testsTotal;
   private volatile long testsIndex;
   private volatile long testsFailed;
-
   @FXML private TextArea input;
   @FXML private TextField status;
   @FXML private Parent splash;
@@ -116,7 +136,6 @@ public final class XCCommander
   @FXML private Label statusName;
   @FXML private Rectangle statusLight;
   @FXML private Pane testsInfoContainer;
-
   @FXML private TextField dataApp;
   @FXML private TextField dataCommit;
   @FXML private TextField dataDuration;
@@ -131,7 +150,6 @@ public final class XCCommander
   @FXML private TextField dataTestsExecuted;
   @FXML private TextField dataTestsFailed;
   @FXML private TextField dataExecutionId;
-
   @FXML private Label heapText;
   @FXML private ProgressBar heapUsed;
 
@@ -180,6 +198,57 @@ public final class XCCommander
 
     this.stagesCreated =
       new ConcurrentLinkedQueue<Stage>();
+  }
+
+  private static Set<KeyCode> generateAllAllowedKeyCodes()
+  {
+    final var codes = new HashSet<KeyCode>(256);
+    for (final var code : KeyCode.values()) {
+      if (code.isLetterKey()) {
+        codes.add(code);
+      }
+      if (code.isDigitKey()) {
+        codes.add(code);
+      }
+    }
+
+    codes.add(AMPERSAND);
+    codes.add(ASTERISK);
+    codes.add(BACK_QUOTE);
+    codes.add(BACK_SLASH);
+    codes.add(BRACELEFT);
+    codes.add(BRACERIGHT);
+    codes.add(CLOSE_BRACKET);
+    codes.add(COLON);
+    codes.add(COMMA);
+    codes.add(DOLLAR);
+    codes.add(EXCLAMATION_MARK);
+    codes.add(MINUS);
+    codes.add(OPEN_BRACKET);
+    codes.add(PERIOD);
+    codes.add(PLUS);
+    codes.add(POUND);
+    codes.add(QUOTE);
+    codes.add(QUOTEDBL);
+    codes.add(SEMICOLON);
+    codes.add(SLASH);
+
+    return Set.copyOf(codes);
+  }
+
+  private static boolean isAllowedKeyCode(
+    final KeyCode code)
+  {
+    return ALL_KEY_CODES.contains(code);
+  }
+
+  private static void pause()
+  {
+    try {
+      Thread.sleep(1L * 16L);
+    } catch (final InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
   }
 
   @Override
@@ -532,37 +601,6 @@ public final class XCCommander
     });
   }
 
-  private static boolean isAllowedKeyCode(
-    final KeyCode code)
-  {
-    if (code.isLetterKey()) {
-      return true;
-    }
-    if (code.isDigitKey()) {
-      return true;
-    }
-
-    return switch (code) {
-      case AMPERSAND,
-        QUOTEDBL,
-        QUOTE,
-        POUND,
-        PLUS,
-        OPEN_BRACKET,
-        MINUS,
-        EXCLAMATION_MARK,
-        DOLLAR,
-        CLOSE_BRACKET,
-        BRACERIGHT,
-        BRACELEFT,
-        BACK_QUOTE,
-        ASTERISK -> {
-        yield true;
-      }
-      default -> false;
-    };
-  }
-
   private void testCountDisplaysUpdate()
   {
     this.progress.setProgress(
@@ -599,18 +637,13 @@ public final class XCCommander
 
       Platform.runLater(this::diagnosticsUnlock);
 
-      final var candidateCodes =
-        Arrays.stream(ALL_KEY_CODES)
-          .filter(XCCommander::isAllowedKeyCode)
-          .toList();
-
       final var newMappings =
         new ConcurrentHashMap<Character, XCKey>();
 
       final var index = new AtomicInteger(1);
-      final var count = candidateCodes.size();
+      final var count = ALL_KEY_CODES.size();
 
-      for (final var code : candidateCodes) {
+      for (final var code : ALL_KEY_CODES) {
         Platform.runLater(() -> {
           this.progress.setProgress(
             index.doubleValue() / (double) count
@@ -725,15 +758,6 @@ public final class XCCommander
     }
   }
 
-  private static void pause()
-  {
-    try {
-      Thread.sleep(1L * 16L);
-    } catch (final InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
-  }
-
   private void releaseAllKeys()
   {
     for (final var code : ALL_KEY_CODES) {
@@ -753,4 +777,6 @@ public final class XCCommander
     this.input.setFocusTraversable(false);
     this.input.setMouseTransparent(true);
   }
+
+
 }
