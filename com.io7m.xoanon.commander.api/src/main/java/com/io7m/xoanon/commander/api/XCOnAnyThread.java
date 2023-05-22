@@ -14,17 +14,21 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
+package com.io7m.xoanon.commander.api;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
- * JUnit 5 JavaFX test harness (Commaner API)
+ * An annotation that indicates that a method can be called on any thread.
  */
 
-module com.io7m.xoanon.commander.api
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.SOURCE)
+public @interface XCOnAnyThread
 {
-  requires static org.osgi.annotation.bundle;
-  requires static org.osgi.annotation.versioning;
 
-  requires javafx.graphics;
-  requires org.slf4j;
-
-  exports com.io7m.xoanon.commander.api;
 }

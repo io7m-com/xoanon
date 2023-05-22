@@ -19,11 +19,12 @@ package com.io7m.xoanon.commander.internal;
 import com.io7m.xoanon.commander.XBVersion;
 import com.io7m.xoanon.commander.api.XCApplicationInfo;
 import com.io7m.xoanon.commander.api.XCCommanderType;
-import com.io7m.xoanon.commander.api.XCTestInfo;
-import com.io7m.xoanon.commander.api.XCTestState;
-import com.io7m.xoanon.commander.api.XCRobotType;
+import com.io7m.xoanon.commander.api.XCFXThread;
 import com.io7m.xoanon.commander.api.XCKey;
 import com.io7m.xoanon.commander.api.XCKeyMap;
+import com.io7m.xoanon.commander.api.XCRobotType;
+import com.io7m.xoanon.commander.api.XCTestInfo;
+import com.io7m.xoanon.commander.api.XCTestState;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -463,7 +464,7 @@ public final class XCCommander
     final Consumer<Stage> onCreate)
   {
     final var stageFuture =
-      XoFXThread.run(() -> {
+      XCFXThread.run(() -> {
         final var newStage = new Stage();
         newStage.setMinWidth(16.0);
         newStage.setMinHeight(16.0);
@@ -503,7 +504,7 @@ public final class XCCommander
   @Override
   public CompletableFuture<Void> stageCloseAll()
   {
-    return XoFXThread.run(() -> {
+    return XCFXThread.run(() -> {
       final var windows = List.copyOf(this.stagesCreated);
       this.stagesCreated.clear();
       this.stagesReleasedCount += windows.size();

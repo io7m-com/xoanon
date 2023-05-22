@@ -15,24 +15,21 @@
  */
 
 
-package com.io7m.xoanon.commander.internal;
+package com.io7m.xoanon.commander.api;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * An operation performed on the FX thread.
- *
- * @param <T> The type of returned values
+ * An annotation that indicates that a method expects to be called on the
+ * JavaFX thread.
  */
 
-public interface XoFXThreadOperationType<T>
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.SOURCE)
+public @interface XCOnFXThread
 {
-  /**
-   * Execute the operation.
-   *
-   * @return A value of {@code T}
-   *
-   * @throws Exception On errors
-   */
 
-  T execute()
-    throws Exception;
 }

@@ -37,7 +37,7 @@ public interface XCCommanderType extends AutoCloseable
    * @param test The test
    */
 
-  @XCAnyThread
+  @XCOnAnyThread
   void setTestState(XCTestInfo test);
 
   /**
@@ -46,7 +46,7 @@ public interface XCCommanderType extends AutoCloseable
    * @param count The test count
    */
 
-  @XCAnyThread
+  @XCOnAnyThread
   void setTestCount(long count);
 
   /**
@@ -55,21 +55,21 @@ public interface XCCommanderType extends AutoCloseable
    * @return The keyboard map
    */
 
-  @XCAnyThread
+  @XCOnAnyThread
   CompletableFuture<XCKeyMap> keyMap();
 
   /**
    * Send the commander window to the back.
    */
 
-  @XCAnyThread
+  @XCOnAnyThread
   void sendToBack();
 
   /**
    * @return A robot for automated tests
    */
 
-  @XCAnyThread
+  @XCOnAnyThread
   CompletableFuture<XCRobotType> robot();
 
   /**
@@ -80,7 +80,7 @@ public interface XCCommanderType extends AutoCloseable
    * @return A new stage
    */
 
-  @XCAnyThread
+  @XCOnAnyThread
   CompletableFuture<Stage> stageNew(Consumer<Stage> onCreate);
 
   /**
@@ -93,7 +93,7 @@ public interface XCCommanderType extends AutoCloseable
    * @throws Exception On errors
    */
 
-  @XCAnyThread
+  @XCOnAnyThread
   default Stage stageNewAndWait(
     final Consumer<Stage> onCreate)
     throws Exception
@@ -108,7 +108,7 @@ public interface XCCommanderType extends AutoCloseable
    * @return The operation in progress
    */
 
-  @XCAnyThread
+  @XCOnAnyThread
   CompletableFuture<Void> stageCloseAll();
 
   /**
@@ -117,7 +117,7 @@ public interface XCCommanderType extends AutoCloseable
    * @param info The information
    */
 
-  @XCAnyThread
+  @XCOnAnyThread
   void setApplicationInfo(XCApplicationInfo info);
 
 }

@@ -18,6 +18,7 @@
 package com.io7m.xoanon.commander.internal;
 
 import com.io7m.xoanon.commander.api.XCFXThread;
+import com.io7m.xoanon.commander.api.XCOnFXThread;
 import com.io7m.xoanon.commander.api.XCRobotType;
 import com.io7m.xoanon.commander.api.XCKey;
 import com.io7m.xoanon.commander.api.XCKeyMap;
@@ -103,7 +104,7 @@ public final class XCRobot implements XCRobotType
     return null;
   }
 
-  @XCFXThread
+  @XCOnFXThread
   private static void opBringStageToFront(
     final Node node)
   {
@@ -116,7 +117,7 @@ public final class XCRobot implements XCRobotType
     stage.toFront();
   }
 
-  @XCFXThread
+  @XCOnFXThread
   private void opPointMouseAt(
     final Node node)
   {
@@ -145,7 +146,7 @@ public final class XCRobot implements XCRobotType
     );
   }
 
-  @XCFXThread
+  @XCOnFXThread
   private void opKeyPress(
     final KeyCode code)
   {
@@ -153,7 +154,7 @@ public final class XCRobot implements XCRobotType
     this.robot.keyPress(code);
   }
 
-  @XCFXThread
+  @XCOnFXThread
   private void opKeyRelease(
     final KeyCode code)
   {
@@ -161,7 +162,7 @@ public final class XCRobot implements XCRobotType
     this.robot.keyRelease(code);
   }
 
-  @XCFXThread
+  @XCOnFXThread
   private void opKeyType(
     final KeyCode code)
   {
@@ -169,7 +170,7 @@ public final class XCRobot implements XCRobotType
     this.robot.keyType(code);
   }
 
-  @XCFXThread
+  @XCOnFXThread
   private void opMousePress(
     final MouseButton button)
   {
@@ -177,7 +178,7 @@ public final class XCRobot implements XCRobotType
     this.robot.mouseClick(button);
   }
 
-  @XCFXThread
+  @XCOnFXThread
   private void opMouseRelease(
     final MouseButton button)
   {
@@ -255,7 +256,7 @@ public final class XCRobot implements XCRobotType
     final String id)
     throws Exception
   {
-    return XoFXThread.run(() -> {
+    return XCFXThread.run(() -> {
       final var scene =
         stage.getScene();
       final var root =
@@ -278,7 +279,7 @@ public final class XCRobot implements XCRobotType
     final String text)
     throws Exception
   {
-    return XoFXThread.run(() -> {
+    return XCFXThread.run(() -> {
       final var scene =
         stage.getScene();
       final var root =
@@ -301,7 +302,7 @@ public final class XCRobot implements XCRobotType
     final String text)
     throws Exception
   {
-    return XoFXThread.run(() -> {
+    return XCFXThread.run(() -> {
       final var result = findWithTextSearch(parent, text);
       if (result == null) {
         throw new NoSuchElementException(
@@ -321,7 +322,7 @@ public final class XCRobot implements XCRobotType
     Platform.runLater(() -> opBringStageToFront(node));
     next();
 
-    XoFXThread.runVWait(1L, SECONDS, () -> this.opPointMouseAt(node));
+    XCFXThread.runVWait(1L, SECONDS, () -> this.opPointMouseAt(node));
     next();
 
     Platform.runLater(() -> this.opMousePress(MouseButton.PRIMARY));
@@ -351,7 +352,7 @@ public final class XCRobot implements XCRobotType
     Platform.runLater(() -> opBringStageToFront(node));
     next();
 
-    XoFXThread.runVWait(1L, SECONDS, () -> this.opPointMouseAt(node));
+    XCFXThread.runVWait(1L, SECONDS, () -> this.opPointMouseAt(node));
     next();
 
     for (final var code : codes) {
@@ -385,7 +386,7 @@ public final class XCRobot implements XCRobotType
     throws Exception
   {
     for (var index = 0; index < frames; ++index) {
-      XoFXThread.run(() -> {
+      XCFXThread.run(() -> {
         Thread.sleep(1L);
         return null;
       }).get(1L, SECONDS);
