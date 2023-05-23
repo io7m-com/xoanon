@@ -22,6 +22,8 @@ import javafx.scene.robot.Robot;
 import javafx.stage.Stage;
 
 import java.util.List;
+import java.util.concurrent.TimeoutException;
+import java.util.function.BooleanSupplier;
 
 /**
  * A robot that can send events to JavaFX nodes. All methods submit work to the
@@ -336,6 +338,23 @@ public interface XCRobotType
 
   void sleepForFrames(int frames)
     throws Exception;
+
+  /**
+   * Wait until the given predicate is true. The predicate is evaluated
+   * repeatedly on the JavaFX UI thread.
+   *
+   * @param ms        The maximum number of milliseconds to wait
+   * @param predicate The predicate to evaluate
+   *
+   * @throws TimeoutException If the predicate does not return {@code true}
+   *                          before {@code ms} milliseconds have elapsed.
+   * @throws Exception        On errors
+   */
+
+  void waitUntil(
+    long ms,
+    BooleanSupplier predicate)
+    throws TimeoutException, Exception;
 
   /**
    * Release all keys, and all mouse buttons.

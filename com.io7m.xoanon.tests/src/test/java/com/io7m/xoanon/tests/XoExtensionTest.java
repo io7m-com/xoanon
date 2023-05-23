@@ -24,8 +24,10 @@ import com.io7m.xoanon.commander.api.XCFXThread;
 import com.io7m.xoanon.commander.api.XCKeyMap;
 import com.io7m.xoanon.commander.api.XCRobotType;
 import com.io7m.xoanon.extension.XoExtension;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,6 +42,7 @@ import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
@@ -275,5 +278,32 @@ public final class XoExtensionTest
             );
           });
       });
+  }
+
+  @Test
+  public void testWaitUntil(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    commander.stageNewAndWait(newStage -> {
+      final var checkBox = new CheckBox();
+      checkBox.setSelected(false);
+      checkBox.setId("x");
+      newStage.setScene(new Scene(checkBox));
+    });
+
+    final var check =
+      bot.findWithIdInAnyStage(CheckBox.class, "x");
+
+    assertThrows(TimeoutException.class, () -> {
+      bot.waitUntil(1_000L, check::isSelected);
+    });
+
+    Platform.runLater(() -> {
+      check.setSelected(true);
+    });
+
+    bot.waitUntil(1_000L, check::isSelected);
   }
 }

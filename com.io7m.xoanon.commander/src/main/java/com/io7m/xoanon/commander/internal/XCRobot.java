@@ -35,11 +35,15 @@ import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -415,7 +419,10 @@ public final class XCRobot implements XCRobotType
     Platform.runLater(() -> opBringStageToFront(node));
     next();
 
-    XCFXThread.runVWait(this.timeout, MILLISECONDS, () -> this.opPointMouseAt(node));
+    XCFXThread.runVWait(
+      this.timeout,
+      MILLISECONDS,
+      () -> this.opPointMouseAt(node));
     next();
 
     Platform.runLater(() -> this.opMousePress(MouseButton.PRIMARY));
@@ -435,7 +442,10 @@ public final class XCRobot implements XCRobotType
     Platform.runLater(() -> opBringStageToFront(node));
     next();
 
-    XCFXThread.runVWait(this.timeout, MILLISECONDS, () -> this.opPointMouseAt(node));
+    XCFXThread.runVWait(
+      this.timeout,
+      MILLISECONDS,
+      () -> this.opPointMouseAt(node));
     next();
 
     Platform.runLater(() -> this.opMousePress(MouseButton.PRIMARY));
@@ -463,7 +473,10 @@ public final class XCRobot implements XCRobotType
     Platform.runLater(() -> opBringStageToFront(node));
     next();
 
-    XCFXThread.runVWait(this.timeout, MILLISECONDS, () -> this.opPointMouseAt(node));
+    XCFXThread.runVWait(
+      this.timeout,
+      MILLISECONDS,
+      () -> this.opPointMouseAt(node));
     next();
 
     this.pause();
@@ -488,7 +501,10 @@ public final class XCRobot implements XCRobotType
     Platform.runLater(() -> opBringStageToFront(node));
     next();
 
-    XCFXThread.runVWait(this.timeout, MILLISECONDS, () -> this.opPointMouseAt(node));
+    XCFXThread.runVWait(
+      this.timeout,
+      MILLISECONDS,
+      () -> this.opPointMouseAt(node));
     next();
 
     for (final var code : codes) {
@@ -526,6 +542,37 @@ public final class XCRobot implements XCRobotType
         Thread.sleep(1L);
         return null;
       }).get(this.timeout, MILLISECONDS);
+    }
+  }
+
+  @Override
+  public void waitUntil(
+    final long ms,
+    final BooleanSupplier predicate)
+    throws TimeoutException, Exception
+  {
+    final var duration =
+      Duration.of(ms, ChronoUnit.MILLIS);
+    final var timeThen =
+      Instant.now();
+
+    while (true) {
+      try {
+        final var isTrue =
+          XCFXThread.run(() -> Boolean.valueOf(predicate.getAsBoolean()))
+            .get(1L, MILLISECONDS);
+
+        if (isTrue.booleanValue()) {
+          return;
+        }
+      } catch (final TimeoutException e) {
+        // Ignore.
+      }
+      final var timeNow = Instant.now();
+      if (Duration.between(timeThen, timeNow).compareTo(duration) >= 0) {
+        throw new TimeoutException(
+          "Condition did not become true before the desired timeout.");
+      }
     }
   }
 
