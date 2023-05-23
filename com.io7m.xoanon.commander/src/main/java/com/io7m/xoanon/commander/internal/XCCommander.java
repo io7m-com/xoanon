@@ -755,34 +755,14 @@ public final class XCCommander
       this.baseRobot.mouseClick(MouseButton.PRIMARY);
     });
 
-    Platform.requestNextPulse();
-    Platform.runLater(() -> {
-      this.input.clear();
-    });
+    this.generateKeyMapOneCharacterNoModifiers(newMappings, code);
+    this.generateKeyMapOneCharacterShift(newMappings, code);
+  }
 
-    Platform.requestNextPulse();
-    Platform.runLater(() -> {
-      this.baseRobot.keyType(code);
-    });
-
-    pause();
-
-    Platform.requestNextPulse();
-    Platform.runLater(() -> {
-      final var text = this.input.getText();
-      LOG.trace("code {} -> '{}'", code, text);
-      if (text.isEmpty()) {
-        return;
-      }
-      final var characters = text.toCharArray();
-      final var character = characters[0];
-
-      newMappings.put(
-        Character.valueOf(character),
-        new XCKey(code, false, false, false)
-      );
-    });
-
+  private void generateKeyMapOneCharacterShift(
+    final ConcurrentHashMap<Character, XCKey> newMappings,
+    final KeyCode code)
+  {
     Platform.requestNextPulse();
     Platform.runLater(() -> {
       this.input.clear();
@@ -818,6 +798,39 @@ public final class XCCommander
       newMappings.put(
         Character.valueOf(character),
         new XCKey(code, true, false, false)
+      );
+    });
+  }
+
+  private void generateKeyMapOneCharacterNoModifiers(
+    final ConcurrentHashMap<Character, XCKey> newMappings,
+    final KeyCode code)
+  {
+    Platform.requestNextPulse();
+    Platform.runLater(() -> {
+      this.input.clear();
+    });
+
+    Platform.requestNextPulse();
+    Platform.runLater(() -> {
+      this.baseRobot.keyType(code);
+    });
+
+    pause();
+
+    Platform.requestNextPulse();
+    Platform.runLater(() -> {
+      final var text = this.input.getText();
+      LOG.trace("code {} -> '{}'", code, text);
+      if (text.isEmpty()) {
+        return;
+      }
+      final var characters = text.toCharArray();
+      final var character = characters[0];
+
+      newMappings.put(
+        Character.valueOf(character),
+        new XCKey(code, false, false, false)
       );
     });
   }
