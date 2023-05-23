@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -305,5 +306,27 @@ public final class XoExtensionTest
     });
 
     bot.waitUntil(1_000L, check::isSelected);
+  }
+
+  @Test
+  public void testFindCheckbox(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var checkRef =
+      new AtomicReference<CheckBox>();
+
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+        final var checkBox = new CheckBox();
+        checkRef.set(checkBox);
+        checkBox.setSelected(false);
+        checkBox.setId("x");
+        newStage.setScene(new Scene(checkBox));
+      });
+
+    final var check = bot.findAllInStage(CheckBox.class, stage);
+    assertEquals(List.of(checkRef.get()), check);
   }
 }

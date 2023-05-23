@@ -38,6 +38,8 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -94,6 +96,7 @@ public final class XCRobot implements XCRobotType
       new AtomicBoolean(false);
   }
 
+  @XCOnFXThread
   private static Node findWithTextSearch(
     final Node node,
     final String text)
@@ -117,6 +120,23 @@ public final class XCRobot implements XCRobotType
   }
 
   @XCOnFXThread
+  private static <T> void findWithTypeSearch(
+    final Collection<T> results,
+    final Class<T> clazz,
+    final Node node)
+  {
+    if (clazz.isAssignableFrom(node.getClass())) {
+      results.add(clazz.cast(node));
+    }
+
+    if (node instanceof final Parent parent) {
+      for (final var child : parent.getChildrenUnmodifiable()) {
+        findWithTypeSearch(results, clazz, child);
+      }
+    }
+  }
+
+  @XCOnFXThread
   private static void opBringStageToFront(
     final Node node)
   {
@@ -127,6 +147,21 @@ public final class XCRobot implements XCRobotType
     final var title = stage.getTitle();
     LOG.trace("bringing stage {} ({}) to front", stage, title);
     stage.toFront();
+  }
+
+  private static void next()
+  {
+    Platform.requestNextPulse();
+  }
+
+  @XCOnFXThread
+  private static <T> Collection<T> findAllInner(
+    final Class<T> clazz,
+    final Parent root)
+  {
+    final var results = new LinkedList<T>();
+    findWithTypeSearch(results, clazz, root);
+    return results;
   }
 
   @XCOnFXThread
@@ -232,11 +267,6 @@ public final class XCRobot implements XCRobotType
     this.pause();
   }
 
-  private static void next()
-  {
-    Platform.requestNextPulse();
-  }
-
   @Override
   public void slowMotionDisable()
   {
@@ -285,6 +315,34 @@ public final class XCRobot implements XCRobotType
   public Robot robot()
   {
     return this.robot;
+  }
+
+  @Override
+  public <T extends Node> Collection<T> findAllInStage(
+    final Class<T> clazz,
+    final Stage stage)
+    throws Exception
+  {
+    return XCFXThread.runAndWait(this.timeout, MILLISECONDS, () -> {
+      final var scene = stage.getScene();
+      if (scene != null) {
+        final var root = scene.getRoot();
+        return findAllInner(clazz, root);
+      } else {
+        return List.of();
+      }
+    });
+  }
+
+  @Override
+  public <T extends Node> Collection<T> findAll(
+    final Class<T> clazz,
+    final Parent parent)
+    throws Exception
+  {
+    return XCFXThread.runAndWait(this.timeout, MILLISECONDS, () -> {
+      return findAllInner(clazz, parent);
+    });
   }
 
   @Override
