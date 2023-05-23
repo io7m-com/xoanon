@@ -192,14 +192,16 @@ public final class XoExtension
   public void executionStarted(
     final TestIdentifier testIdentifier)
   {
-    COMMANDER.setTestState(
-      new XCTestInfo(
-        OffsetDateTime.now(),
-        testIdentifier.getUniqueId(),
-        testIdentifier.getDisplayName(),
-        XCTestState.RUNNING
-      )
-    );
+    if (COMMANDER != null) {
+      COMMANDER.setTestState(
+        new XCTestInfo(
+          OffsetDateTime.now(),
+          testIdentifier.getUniqueId(),
+          testIdentifier.getDisplayName(),
+          XCTestState.RUNNING
+        )
+      );
+    }
   }
 
   @Override
