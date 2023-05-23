@@ -20,7 +20,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Robot functions related to finding nodes.
@@ -40,7 +40,7 @@ public interface XCRobotFindType
    * @throws Exception On errors
    */
 
-  <T extends Node> Collection<T> findAllInStage(
+  <T extends Node> List<T> findAllInStage(
     Class<T> clazz,
     Stage stage)
     throws Exception;
@@ -57,7 +57,7 @@ public interface XCRobotFindType
    * @throws Exception On errors
    */
 
-  <T extends Node> Collection<T> findAll(
+  <T extends Node> List<T> findAll(
     Class<T> clazz,
     Parent parent)
     throws Exception;

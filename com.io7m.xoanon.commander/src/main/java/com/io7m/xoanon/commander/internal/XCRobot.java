@@ -155,7 +155,7 @@ public final class XCRobot implements XCRobotType
   }
 
   @XCOnFXThread
-  private static <T> Collection<T> findAllInner(
+  private static <T> List<T> findAllInner(
     final Class<T> clazz,
     final Parent root)
   {
@@ -318,7 +318,7 @@ public final class XCRobot implements XCRobotType
   }
 
   @Override
-  public <T extends Node> Collection<T> findAllInStage(
+  public <T extends Node> List<T> findAllInStage(
     final Class<T> clazz,
     final Stage stage)
     throws Exception
@@ -335,7 +335,7 @@ public final class XCRobot implements XCRobotType
   }
 
   @Override
-  public <T extends Node> Collection<T> findAll(
+  public <T extends Node> List<T> findAll(
     final Class<T> clazz,
     final Parent parent)
     throws Exception
