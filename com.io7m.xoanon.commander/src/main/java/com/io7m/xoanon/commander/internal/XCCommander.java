@@ -81,21 +81,29 @@ import static javafx.scene.input.KeyCode.BACK_QUOTE;
 import static javafx.scene.input.KeyCode.BACK_SLASH;
 import static javafx.scene.input.KeyCode.BRACELEFT;
 import static javafx.scene.input.KeyCode.BRACERIGHT;
+import static javafx.scene.input.KeyCode.CIRCUMFLEX;
 import static javafx.scene.input.KeyCode.CLOSE_BRACKET;
 import static javafx.scene.input.KeyCode.COLON;
 import static javafx.scene.input.KeyCode.COMMA;
 import static javafx.scene.input.KeyCode.DOLLAR;
+import static javafx.scene.input.KeyCode.EURO_SIGN;
 import static javafx.scene.input.KeyCode.EXCLAMATION_MARK;
+import static javafx.scene.input.KeyCode.GREATER;
+import static javafx.scene.input.KeyCode.LEFT_PARENTHESIS;
+import static javafx.scene.input.KeyCode.LESS;
 import static javafx.scene.input.KeyCode.MINUS;
+import static javafx.scene.input.KeyCode.NUMBER_SIGN;
 import static javafx.scene.input.KeyCode.OPEN_BRACKET;
 import static javafx.scene.input.KeyCode.PERIOD;
 import static javafx.scene.input.KeyCode.PLUS;
 import static javafx.scene.input.KeyCode.POUND;
 import static javafx.scene.input.KeyCode.QUOTE;
 import static javafx.scene.input.KeyCode.QUOTEDBL;
+import static javafx.scene.input.KeyCode.RIGHT_PARENTHESIS;
 import static javafx.scene.input.KeyCode.SEMICOLON;
 import static javafx.scene.input.KeyCode.SHIFT;
 import static javafx.scene.input.KeyCode.SLASH;
+import static javafx.scene.input.KeyCode.UNDERSCORE;
 
 /**
  * The main commander.
@@ -202,6 +210,12 @@ public final class XCCommander
       new ConcurrentLinkedQueue<Stage>();
   }
 
+  /*
+   * Generate the set of keycodes that keymap generation is allowed to
+   * use. There is a tension here between providing complete coverage and
+   * not pressing any "dangerous" keys.
+   */
+
   private static Set<KeyCode> generateAllAllowedKeyCodes()
   {
     final var codes = new HashSet<KeyCode>(256);
@@ -220,20 +234,28 @@ public final class XCCommander
     codes.add(BACK_SLASH);
     codes.add(BRACELEFT);
     codes.add(BRACERIGHT);
+    codes.add(CIRCUMFLEX);
     codes.add(CLOSE_BRACKET);
     codes.add(COLON);
     codes.add(COMMA);
     codes.add(DOLLAR);
+    codes.add(EURO_SIGN);
     codes.add(EXCLAMATION_MARK);
+    codes.add(GREATER);
+    codes.add(LEFT_PARENTHESIS);
+    codes.add(LESS);
     codes.add(MINUS);
+    codes.add(NUMBER_SIGN);
     codes.add(OPEN_BRACKET);
     codes.add(PERIOD);
     codes.add(PLUS);
     codes.add(POUND);
     codes.add(QUOTE);
     codes.add(QUOTEDBL);
+    codes.add(RIGHT_PARENTHESIS);
     codes.add(SEMICOLON);
     codes.add(SLASH);
+    codes.add(UNDERSCORE);
 
     return Set.copyOf(codes);
   }
