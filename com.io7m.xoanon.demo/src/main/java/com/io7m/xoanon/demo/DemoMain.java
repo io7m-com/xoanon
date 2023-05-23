@@ -82,7 +82,6 @@ public final class DemoMain
       );
 
       cmd.keyMap().get(30L, SECONDS);
-      cmd.setTestCount(names.size());
 
       for (final var name : names) {
         cmd.setTestState(new XCTestInfo(now(), name, name, INITIAL));
