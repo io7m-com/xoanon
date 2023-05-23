@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -65,6 +66,7 @@ public final class XCRobot implements XCRobotType
 
   private final XCKeyMap keyMap;
   private final Robot robot;
+  private final AtomicBoolean slowMotion;
   private long timeout;
 
   /**
@@ -84,6 +86,8 @@ public final class XCRobot implements XCRobotType
       Objects.requireNonNull(inBaseRobot, "inBaseRobot");
     this.timeout =
       1000L;
+    this.slowMotion =
+      new AtomicBoolean(false);
   }
 
   private static Node findWithTextSearch(
@@ -221,12 +225,24 @@ public final class XCRobot implements XCRobotType
       Platform.runLater(() -> this.opKeyRelease(SHIFT));
       next();
     }
-    pause();
+    this.pause();
   }
 
   private static void next()
   {
     Platform.requestNextPulse();
+  }
+
+  @Override
+  public void slowMotionDisable()
+  {
+    this.slowMotion.set(false);
+  }
+
+  @Override
+  public void slowMotionEnable()
+  {
+    this.slowMotion.set(true);
   }
 
   @Override
@@ -408,7 +424,35 @@ public final class XCRobot implements XCRobotType
     Platform.runLater(() -> this.opMouseRelease(MouseButton.PRIMARY));
     next();
 
-    pause();
+    this.pause();
+  }
+
+  @Override
+  public void doubleClick(
+    final Node node)
+    throws Exception
+  {
+    Platform.runLater(() -> opBringStageToFront(node));
+    next();
+
+    XCFXThread.runVWait(this.timeout, MILLISECONDS, () -> this.opPointMouseAt(node));
+    next();
+
+    Platform.runLater(() -> this.opMousePress(MouseButton.PRIMARY));
+    next();
+
+    Platform.runLater(() -> this.opMouseRelease(MouseButton.PRIMARY));
+    next();
+
+    Thread.sleep(50L);
+
+    Platform.runLater(() -> this.opMousePress(MouseButton.PRIMARY));
+    next();
+
+    Platform.runLater(() -> this.opMouseRelease(MouseButton.PRIMARY));
+    next();
+
+    this.pause();
   }
 
   @Override
@@ -422,13 +466,14 @@ public final class XCRobot implements XCRobotType
     XCFXThread.runVWait(this.timeout, MILLISECONDS, () -> this.opPointMouseAt(node));
     next();
 
-    pause();
+    this.pause();
   }
 
-  private static void pause()
+  private void pause()
   {
     try {
-      Thread.sleep(16L * 2L);
+      final var time = this.slowMotion.get() ? 1000L : 16L * 2L;
+      Thread.sleep(time);
     } catch (final InterruptedException e) {
       Thread.currentThread().interrupt();
     }
@@ -454,7 +499,7 @@ public final class XCRobot implements XCRobotType
       this.typeKey(code);
     }
 
-    pause();
+    this.pause();
   }
 
   @Override
@@ -487,6 +532,8 @@ public final class XCRobot implements XCRobotType
   @Override
   public void reset()
   {
+    this.slowMotionDisable();
+
     for (final var code : ALL_KEY_CODES) {
       Platform.runLater(() -> this.opKeyRelease(code));
       Platform.requestNextPulse();

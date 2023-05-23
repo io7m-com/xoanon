@@ -17,6 +17,8 @@
 package com.io7m.xoanon.tests;
 
 import com.io7m.percentpass.extension.PercentPassing;
+import com.io7m.xoanon.commander.XBVersion;
+import com.io7m.xoanon.commander.api.XCApplicationInfo;
 import com.io7m.xoanon.commander.api.XCCommanderType;
 import com.io7m.xoanon.commander.api.XCFXThread;
 import com.io7m.xoanon.commander.api.XCRobotType;
@@ -25,6 +27,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -46,6 +49,18 @@ public final class XoExtensionTest
 {
   private static final Logger LOG =
     LoggerFactory.getLogger(XoExtensionTest.class);
+
+  @BeforeAll
+  public static void beforeAll()
+  {
+    XoExtension.setApplicationInfo(
+      new XCApplicationInfo(
+        "com.io7m.xoanon",
+        XBVersion.MAIN_VERSION,
+        XBVersion.MAIN_BUILD
+      )
+    );
+  }
 
   @PercentPassing(executionCount = 6, passPercent = 50.0)
   public void testButton(
@@ -148,6 +163,32 @@ public final class XoExtensionTest
       });
 
     assertInstanceOf(NoSuchElementException.class, ex.getCause());
+  }
+
+  @Test
+  public void testDoubleClick(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var doubleClicked =
+      new AtomicBoolean(false);
+
+    commander.stageNewAndWait(newStage -> {
+      final var button = new Button("OK");
+      button.setId("x");
+      button.setOnMouseClicked(event -> {
+        if (event.getClickCount() == 2) {
+          doubleClicked.set(true);
+        }
+      });
+      newStage.setScene(new Scene(button));
+    });
+
+    final var node = bot.findWithIdInAnyStage(Button.class, "x");
+    bot.doubleClick(node);
+
+    assertTrue(doubleClicked.get());
   }
 
   @Test

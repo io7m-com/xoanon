@@ -17,11 +17,12 @@
 package com.io7m.xoanon.extension;
 
 import com.io7m.xoanon.commander.XCommanders;
+import com.io7m.xoanon.commander.api.XCApplicationInfo;
 import com.io7m.xoanon.commander.api.XCCommanderType;
+import com.io7m.xoanon.commander.api.XCKeyMap;
+import com.io7m.xoanon.commander.api.XCRobotType;
 import com.io7m.xoanon.commander.api.XCTestInfo;
 import com.io7m.xoanon.commander.api.XCTestState;
-import com.io7m.xoanon.commander.api.XCRobotType;
-import com.io7m.xoanon.commander.api.XCKeyMap;
 import javafx.application.Platform;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -49,9 +50,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.io7m.xoanon.commander.api.XCTestState.FAILED;
 import static com.io7m.xoanon.commander.api.XCTestState.INITIAL;
 import static com.io7m.xoanon.commander.api.XCTestState.SUCCEEDED;
-import static org.junit.platform.engine.TestDescriptor.Type.CONTAINER;
-import static org.junit.platform.engine.TestDescriptor.Type.CONTAINER_AND_TEST;
-import static org.junit.platform.engine.TestDescriptor.Type.TEST;
 
 /**
  * A simple JavaFX extension for JUnit 5 tests.
@@ -84,6 +82,18 @@ public final class XoExtension
   public XoExtension()
   {
 
+  }
+
+  /**
+   * Set the application being tested.
+   *
+   * @param info The info
+   */
+
+  public static void setApplicationInfo(
+    final XCApplicationInfo info)
+  {
+    COMMANDER.setApplicationInfo(info);
   }
 
   @Override

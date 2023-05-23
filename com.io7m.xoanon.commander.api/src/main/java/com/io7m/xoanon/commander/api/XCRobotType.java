@@ -32,6 +32,19 @@ import java.util.List;
 public interface XCRobotType
 {
   /**
+   * Disable slow motion mode.
+   */
+
+  void slowMotionDisable();
+
+  /**
+   * Enable slow motion mode. This causes the robot to insert long pauses
+   * between operations in order to assist with debugging failing tests.
+   */
+
+  void slowMotionEnable();
+
+  /**
    * @return The current timeout value in milliseconds
    */
 
@@ -261,6 +274,17 @@ public interface XCRobotType
    */
 
   void click(Node node)
+    throws Exception;
+
+  /**
+   * Double-click on the given node using the primary mouse button.
+   *
+   * @param node The node
+   *
+   * @throws Exception On errors
+   */
+
+  void doubleClick(Node node)
     throws Exception;
 
   /**
