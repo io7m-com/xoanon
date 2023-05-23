@@ -18,6 +18,7 @@
 package com.io7m.xoanon.commander.internal;
 
 import com.io7m.xoanon.commander.api.XCFXThread;
+import com.io7m.xoanon.commander.api.XCFXThreadOperationType;
 import com.io7m.xoanon.commander.api.XCKey;
 import com.io7m.xoanon.commander.api.XCKeyMap;
 import com.io7m.xoanon.commander.api.XCOnFXThread;
@@ -268,6 +269,24 @@ public final class XCRobot implements XCRobotType
   }
 
   @Override
+  public void execute(
+    final Runnable f)
+    throws Exception
+  {
+    Objects.requireNonNull(f, "f");
+    XCFXThread.runVWait(this.timeout, MILLISECONDS, f);
+  }
+
+  @Override
+  public <T> T evaluate(
+    final XCFXThreadOperationType<T> f)
+    throws Exception
+  {
+    Objects.requireNonNull(f, "f");
+    return XCFXThread.runAndWait(this.timeout, MILLISECONDS, f);
+  }
+
+  @Override
   public void slowMotionDisable()
   {
     this.slowMotion.set(false);
@@ -323,7 +342,7 @@ public final class XCRobot implements XCRobotType
     final Stage stage)
     throws Exception
   {
-    return XCFXThread.runAndWait(this.timeout, MILLISECONDS, () -> {
+    return this.evaluate(() -> {
       final var scene = stage.getScene();
       if (scene != null) {
         final var root = scene.getRoot();
@@ -340,7 +359,7 @@ public final class XCRobot implements XCRobotType
     final Parent parent)
     throws Exception
   {
-    return XCFXThread.runAndWait(this.timeout, MILLISECONDS, () -> {
+    return this.evaluate(() -> {
       return findAllInner(clazz, parent);
     });
   }
@@ -350,7 +369,7 @@ public final class XCRobot implements XCRobotType
     final String id)
     throws Exception
   {
-    return XCFXThread.run(() -> {
+    return this.evaluate(() -> {
       final var windows =
         Window.getWindows()
           .stream()
@@ -372,7 +391,7 @@ public final class XCRobot implements XCRobotType
       throw new NoSuchElementException(
         "No element with ID: %s".formatted(id)
       );
-    }).get(this.timeout, MILLISECONDS);
+    });
   }
 
   @Override
@@ -381,7 +400,7 @@ public final class XCRobot implements XCRobotType
     final String id)
     throws Exception
   {
-    return XCFXThread.run(() -> {
+    return this.evaluate(() -> {
       final var scene =
         stage.getScene();
       final var root =
@@ -395,7 +414,7 @@ public final class XCRobot implements XCRobotType
       }
 
       return result;
-    }).get(this.timeout, MILLISECONDS);
+    });
   }
 
   @Override
@@ -403,7 +422,7 @@ public final class XCRobot implements XCRobotType
     final String text)
     throws Exception
   {
-    return XCFXThread.run(() -> {
+    return this.evaluate(() -> {
       final var windows =
         Window.getWindows()
           .stream()
@@ -425,7 +444,7 @@ public final class XCRobot implements XCRobotType
       throw new NoSuchElementException(
         "No element with text: %s".formatted(text)
       );
-    }).get(this.timeout, MILLISECONDS);
+    });
   }
 
   @Override
@@ -434,7 +453,7 @@ public final class XCRobot implements XCRobotType
     final String text)
     throws Exception
   {
-    return XCFXThread.run(() -> {
+    return this.evaluate(() -> {
       final var scene =
         stage.getScene();
       final var root =
@@ -448,7 +467,7 @@ public final class XCRobot implements XCRobotType
       }
 
       return result;
-    }).get(this.timeout, MILLISECONDS);
+    });
   }
 
   @Override
@@ -457,7 +476,7 @@ public final class XCRobot implements XCRobotType
     final String text)
     throws Exception
   {
-    return XCFXThread.run(() -> {
+    return this.evaluate(() -> {
       final var result = findWithTextSearch(parent, text);
       if (result == null) {
         throw new NoSuchElementException(
@@ -466,7 +485,7 @@ public final class XCRobot implements XCRobotType
       }
 
       return result;
-    }).get(this.timeout, MILLISECONDS);
+    });
   }
 
   @Override
@@ -477,10 +496,7 @@ public final class XCRobot implements XCRobotType
     Platform.runLater(() -> opBringStageToFront(node));
     next();
 
-    XCFXThread.runVWait(
-      this.timeout,
-      MILLISECONDS,
-      () -> this.opPointMouseAt(node));
+    this.execute(() -> this.opPointMouseAt(node));
     next();
 
     Platform.runLater(() -> this.opMousePress(MouseButton.PRIMARY));
@@ -500,10 +516,7 @@ public final class XCRobot implements XCRobotType
     Platform.runLater(() -> opBringStageToFront(node));
     next();
 
-    XCFXThread.runVWait(
-      this.timeout,
-      MILLISECONDS,
-      () -> this.opPointMouseAt(node));
+    this.execute(() -> this.opPointMouseAt(node));
     next();
 
     Platform.runLater(() -> this.opMousePress(MouseButton.PRIMARY));
@@ -531,10 +544,7 @@ public final class XCRobot implements XCRobotType
     Platform.runLater(() -> opBringStageToFront(node));
     next();
 
-    XCFXThread.runVWait(
-      this.timeout,
-      MILLISECONDS,
-      () -> this.opPointMouseAt(node));
+    this.execute(() -> this.opPointMouseAt(node));
     next();
 
     this.pause();
@@ -559,10 +569,7 @@ public final class XCRobot implements XCRobotType
     Platform.runLater(() -> opBringStageToFront(node));
     next();
 
-    XCFXThread.runVWait(
-      this.timeout,
-      MILLISECONDS,
-      () -> this.opPointMouseAt(node));
+    this.execute(() -> this.opPointMouseAt(node));
     next();
 
     for (final var code : codes) {

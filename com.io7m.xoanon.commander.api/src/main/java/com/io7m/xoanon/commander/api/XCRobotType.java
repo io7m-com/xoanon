@@ -28,8 +28,39 @@ import java.util.function.BooleanSupplier;
  * that thread (up to a configurable timeout value).
  */
 
-public interface XCRobotType extends XCRobotFindType, XCRobotInteractionsType
+public interface XCRobotType
+  extends XCRobotFindType,
+  XCRobotInteractionsType
 {
+  /**
+   * Execute {@code f} on the UI thread, and wait for it to complete
+   * (subject to the configured timeout).
+   *
+   * @param f The runnable
+   *
+   * @throws Exception On errors
+   * @see XCFXThread#run(XCFXThreadOperationType)
+   */
+
+  void execute(Runnable f)
+    throws Exception;
+
+  /**
+   * Evaluate {@code f} on the UI thread, and wait for it to complete
+   * (subject to the configured timeout).
+   *
+   * @param f   The function
+   * @param <T> The type of results
+   *
+   * @return The result of {@code f}
+   *
+   * @throws Exception On errors
+   * @see XCFXThread#run(XCFXThreadOperationType)
+   */
+
+  <T> T evaluate(XCFXThreadOperationType<T> f)
+    throws Exception;
+
   /**
    * Disable slow motion mode.
    */
