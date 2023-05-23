@@ -75,6 +75,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static javafx.animation.Interpolator.LINEAR;
+import static javafx.scene.input.KeyCode.ADD;
 import static javafx.scene.input.KeyCode.AMPERSAND;
 import static javafx.scene.input.KeyCode.ASTERISK;
 import static javafx.scene.input.KeyCode.BACK_QUOTE;
@@ -85,7 +86,10 @@ import static javafx.scene.input.KeyCode.CIRCUMFLEX;
 import static javafx.scene.input.KeyCode.CLOSE_BRACKET;
 import static javafx.scene.input.KeyCode.COLON;
 import static javafx.scene.input.KeyCode.COMMA;
+import static javafx.scene.input.KeyCode.DECIMAL;
+import static javafx.scene.input.KeyCode.DIVIDE;
 import static javafx.scene.input.KeyCode.DOLLAR;
+import static javafx.scene.input.KeyCode.EQUALS;
 import static javafx.scene.input.KeyCode.EURO_SIGN;
 import static javafx.scene.input.KeyCode.EXCLAMATION_MARK;
 import static javafx.scene.input.KeyCode.GREATER;
@@ -103,7 +107,10 @@ import static javafx.scene.input.KeyCode.RIGHT_PARENTHESIS;
 import static javafx.scene.input.KeyCode.SEMICOLON;
 import static javafx.scene.input.KeyCode.SHIFT;
 import static javafx.scene.input.KeyCode.SLASH;
+import static javafx.scene.input.KeyCode.STAR;
+import static javafx.scene.input.KeyCode.SUBTRACT;
 import static javafx.scene.input.KeyCode.UNDERSCORE;
+import static javafx.scene.input.KeyCode.values;
 
 /**
  * The main commander.
@@ -127,10 +134,10 @@ public final class XCCommander
   private final AtomicBoolean testsStarted;
   private final OffsetDateTime timeStarted;
   private final ConcurrentLinkedQueue<Stage> stagesCreated;
+  private final Set<String> testsRegistered;
   private volatile int stagesCreatedCount;
   private volatile int stagesReleasedCount;
   private volatile XCTestState testsStateWorst;
-  private volatile long testsTotal;
   private volatile long testsIndex;
   private volatile long testsFailed;
 
@@ -179,6 +186,8 @@ public final class XCCommander
     this.stage =
       Objects.requireNonNull(inStage, "stage");
 
+    this.testsRegistered =
+      ConcurrentHashMap.newKeySet();
     this.testsStateWorst =
       XCTestState.INITIAL;
     this.testsStarted =
@@ -219,7 +228,7 @@ public final class XCCommander
   private static Set<KeyCode> generateAllAllowedKeyCodes()
   {
     final var codes = new HashSet<KeyCode>(256);
-    for (final var code : KeyCode.values()) {
+    for (final var code : values()) {
       if (code.isLetterKey()) {
         codes.add(code);
       }
@@ -228,6 +237,7 @@ public final class XCCommander
       }
     }
 
+    codes.add(ADD);
     codes.add(AMPERSAND);
     codes.add(ASTERISK);
     codes.add(BACK_QUOTE);
@@ -238,7 +248,10 @@ public final class XCCommander
     codes.add(CLOSE_BRACKET);
     codes.add(COLON);
     codes.add(COMMA);
+    codes.add(DECIMAL);
+    codes.add(DIVIDE);
     codes.add(DOLLAR);
+    codes.add(EQUALS);
     codes.add(EURO_SIGN);
     codes.add(EXCLAMATION_MARK);
     codes.add(GREATER);
@@ -255,6 +268,8 @@ public final class XCCommander
     codes.add(RIGHT_PARENTHESIS);
     codes.add(SEMICOLON);
     codes.add(SLASH);
+    codes.add(STAR);
+    codes.add(SUBTRACT);
     codes.add(UNDERSCORE);
 
     return Set.copyOf(codes);
@@ -464,6 +479,8 @@ public final class XCCommander
     }
 
     Platform.runLater(() -> {
+      this.testsRegistered.add(test.id());
+
       switch (test.state()) {
         case FAILED -> {
           ++this.testsFailed;
@@ -502,16 +519,6 @@ public final class XCCommander
       newList.add(test);
       newList.sort(Comparator.comparing(XCTestInfo::time).reversed());
       this.testsList.setAll(newList.stream().limit(40L).toList());
-    });
-  }
-
-  @Override
-  public void setTestCount(
-    final long count)
-  {
-    Platform.runLater(() -> {
-      this.testsTotal = count;
-      this.testCountDisplaysUpdate();
     });
   }
 
@@ -634,11 +641,14 @@ public final class XCCommander
 
   private void testCountDisplaysUpdate()
   {
+    final var total =
+      Integer.toUnsignedLong(this.testsRegistered.size());
+
     this.progress.setProgress(
-      (double) this.testsIndex / (double) this.testsTotal
+      (double) this.testsIndex / (double) total
     );
     this.dataTestsExpected.setText(
-      Long.toUnsignedString(this.testsTotal)
+      Long.toUnsignedString(total)
     );
     this.dataTestsExecuted.setText(
       Long.toUnsignedString(this.testsIndex)
@@ -687,85 +697,9 @@ public final class XCCommander
           );
         });
 
-        Platform.runLater(() -> {
-          LOG.trace("check {}", code);
-          this.status.setText("Generating keymap: Checking text for %s".formatted(
-            code));
-
-          final var bounds =
-            this.input.localToScreen(this.input.getBoundsInLocal());
-          final var target =
-            new Point2D(bounds.getCenterX(), bounds.getCenterY());
-
-          this.baseRobot.mouseMove(target);
-          this.baseRobot.mouseClick(MouseButton.PRIMARY);
-        });
-
-        Platform.requestNextPulse();
-        Platform.runLater(() -> {
-          this.input.clear();
-        });
-
-        Platform.requestNextPulse();
-        Platform.runLater(() -> {
-          this.baseRobot.keyType(code);
-        });
-
-        pause();
-
-        Platform.requestNextPulse();
-        Platform.runLater(() -> {
-          final var text = this.input.getText();
-          LOG.trace("code {} -> '{}'", code, text);
-          if (text.isEmpty()) {
-            return;
-          }
-          final var characters = text.toCharArray();
-          final var character = characters[0];
-
-          newMappings.put(
-            Character.valueOf(character),
-            new XCKey(code, false, false, false)
-          );
-        });
-
-        Platform.requestNextPulse();
-        Platform.runLater(() -> {
-          this.input.clear();
-        });
-
-        Platform.requestNextPulse();
-        Platform.runLater(() -> {
-          this.baseRobot.keyPress(SHIFT);
-        });
-
-        Platform.requestNextPulse();
-        Platform.runLater(() -> {
-          this.baseRobot.keyType(code);
-        });
-
-        pause();
-
-        Platform.requestNextPulse();
-        Platform.runLater(() -> {
-          this.baseRobot.keyRelease(SHIFT);
-        });
-
-        Platform.requestNextPulse();
-        Platform.runLater(() -> {
-          final var text = this.input.getText();
-          LOG.trace("SHIFT code {} -> '{}'", code, text);
-          if (text.isEmpty()) {
-            return;
-          }
-          final var characters = text.toCharArray();
-          final var character = characters[0];
-
-          newMappings.put(
-            Character.valueOf(character),
-            new XCKey(code, true, false, false)
-          );
-        });
+        for (int attempt = 0; attempt < 2; ++attempt) {
+          this.generateKeyMapOneCharacter(newMappings, code);
+        }
 
         Platform.requestNextPulse();
         Platform.runLater(index::incrementAndGet);
@@ -801,6 +735,91 @@ public final class XCCommander
       Platform.requestNextPulse();
       this.releaseAllKeys();
     }
+  }
+
+  private void generateKeyMapOneCharacter(
+    final ConcurrentHashMap<Character, XCKey> newMappings,
+    final KeyCode code)
+  {
+    Platform.runLater(() -> {
+      LOG.trace("check {}", code);
+      this.status.setText("Generating keymap: Checking text for %s".formatted(
+        code));
+
+      final var bounds =
+        this.input.localToScreen(this.input.getBoundsInLocal());
+      final var target =
+        new Point2D(bounds.getCenterX(), bounds.getCenterY());
+
+      this.baseRobot.mouseMove(target);
+      this.baseRobot.mouseClick(MouseButton.PRIMARY);
+    });
+
+    Platform.requestNextPulse();
+    Platform.runLater(() -> {
+      this.input.clear();
+    });
+
+    Platform.requestNextPulse();
+    Platform.runLater(() -> {
+      this.baseRobot.keyType(code);
+    });
+
+    pause();
+
+    Platform.requestNextPulse();
+    Platform.runLater(() -> {
+      final var text = this.input.getText();
+      LOG.trace("code {} -> '{}'", code, text);
+      if (text.isEmpty()) {
+        return;
+      }
+      final var characters = text.toCharArray();
+      final var character = characters[0];
+
+      newMappings.put(
+        Character.valueOf(character),
+        new XCKey(code, false, false, false)
+      );
+    });
+
+    Platform.requestNextPulse();
+    Platform.runLater(() -> {
+      this.input.clear();
+    });
+
+    Platform.requestNextPulse();
+    Platform.runLater(() -> {
+      this.baseRobot.keyPress(SHIFT);
+    });
+
+    Platform.requestNextPulse();
+    Platform.runLater(() -> {
+      this.baseRobot.keyType(code);
+    });
+
+    pause();
+
+    Platform.requestNextPulse();
+    Platform.runLater(() -> {
+      this.baseRobot.keyRelease(SHIFT);
+    });
+
+    Platform.requestNextPulse();
+    Platform.runLater(() -> {
+      final var text = this.input.getText();
+      LOG.trace("SHIFT code {} -> '{}'", code, text);
+      if (text.isEmpty()) {
+        return;
+      }
+      final var characters = text.toCharArray();
+      final var character = characters[0];
+
+      newMappings.put(
+        Character.valueOf(character),
+        new XCKey(code, true, false, false)
+      );
+    });
   }
 
   private void releaseAllKeys()

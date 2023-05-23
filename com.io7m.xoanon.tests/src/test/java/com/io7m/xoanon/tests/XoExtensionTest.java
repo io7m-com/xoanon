@@ -21,6 +21,7 @@ import com.io7m.xoanon.commander.XBVersion;
 import com.io7m.xoanon.commander.api.XCApplicationInfo;
 import com.io7m.xoanon.commander.api.XCCommanderType;
 import com.io7m.xoanon.commander.api.XCFXThread;
+import com.io7m.xoanon.commander.api.XCKeyMap;
 import com.io7m.xoanon.commander.api.XCRobotType;
 import com.io7m.xoanon.extension.XoExtension;
 import javafx.scene.Scene;
@@ -28,16 +29,20 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -204,5 +209,71 @@ public final class XoExtensionTest
       stage.setHeight(640.0);
       stage.show();
     });
+  }
+
+  @TestFactory
+  public Stream<DynamicTest> testCommonKeys(
+    final XCKeyMap keyMap)
+  {
+    final var expectedCharacters = new ArrayList<Character>();
+    for (char c = 'a'; c <= 'z'; ++c) {
+      expectedCharacters.add(Character.valueOf(c));
+      expectedCharacters.add(Character.valueOf(Character.toUpperCase(c)));
+    }
+    expectedCharacters.add(Character.valueOf('0'));
+    expectedCharacters.add(Character.valueOf('1'));
+    expectedCharacters.add(Character.valueOf('2'));
+    expectedCharacters.add(Character.valueOf('3'));
+    expectedCharacters.add(Character.valueOf('4'));
+    expectedCharacters.add(Character.valueOf('5'));
+    expectedCharacters.add(Character.valueOf('6'));
+    expectedCharacters.add(Character.valueOf('7'));
+    expectedCharacters.add(Character.valueOf('8'));
+    expectedCharacters.add(Character.valueOf('9'));
+
+    expectedCharacters.add(Character.valueOf('!'));
+    expectedCharacters.add(Character.valueOf('"'));
+    expectedCharacters.add(Character.valueOf('$'));
+    expectedCharacters.add(Character.valueOf('%'));
+    expectedCharacters.add(Character.valueOf('^'));
+    expectedCharacters.add(Character.valueOf('&'));
+    expectedCharacters.add(Character.valueOf('*'));
+    expectedCharacters.add(Character.valueOf('('));
+    expectedCharacters.add(Character.valueOf(')'));
+    expectedCharacters.add(Character.valueOf('-'));
+    expectedCharacters.add(Character.valueOf('_'));
+    expectedCharacters.add(Character.valueOf('='));
+    expectedCharacters.add(Character.valueOf('+'));
+    expectedCharacters.add(Character.valueOf('['));
+    expectedCharacters.add(Character.valueOf(']'));
+    expectedCharacters.add(Character.valueOf('{'));
+    expectedCharacters.add(Character.valueOf('}'));
+    expectedCharacters.add(Character.valueOf(':'));
+    expectedCharacters.add(Character.valueOf(';'));
+    expectedCharacters.add(Character.valueOf('@'));
+    expectedCharacters.add(Character.valueOf('\''));
+    expectedCharacters.add(Character.valueOf('~'));
+    expectedCharacters.add(Character.valueOf('#'));
+    expectedCharacters.add(Character.valueOf('<'));
+    expectedCharacters.add(Character.valueOf('>'));
+    expectedCharacters.add(Character.valueOf(','));
+    expectedCharacters.add(Character.valueOf('.'));
+    expectedCharacters.add(Character.valueOf('?'));
+    expectedCharacters.add(Character.valueOf('/'));
+    expectedCharacters.add(Character.valueOf('\\'));
+    expectedCharacters.add(Character.valueOf('|'));
+    expectedCharacters.add(Character.valueOf('`'));
+
+    return expectedCharacters.stream()
+      .map(c -> {
+        return DynamicTest.dynamicTest(
+          "testCommonKeys_%s".formatted(c),
+          () -> {
+            assertTrue(
+              keyMap.keys().containsKey(c),
+              () -> "Key map contains '%s'".formatted(c)
+            );
+          });
+      });
   }
 }

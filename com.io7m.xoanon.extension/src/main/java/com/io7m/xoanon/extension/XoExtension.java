@@ -32,6 +32,7 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestWatcher;
+import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.launcher.LauncherSession;
 import org.junit.platform.launcher.LauncherSessionListener;
 import org.junit.platform.launcher.TestExecutionListener;
@@ -44,12 +45,12 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.io7m.xoanon.commander.api.XCTestState.FAILED;
 import static com.io7m.xoanon.commander.api.XCTestState.INITIAL;
 import static com.io7m.xoanon.commander.api.XCTestState.SUCCEEDED;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * A simple JavaFX extension for JUnit 5 tests.
@@ -145,9 +146,8 @@ public final class XoExtension
     if (FX_PLATFORM_STARTED.compareAndSet(false, true)) {
       LOG.trace("starting JavaFX platform");
       Platform.setImplicitExit(false);
-      COMMANDER = XCommanders.boot().get(30L, TimeUnit.SECONDS);
+      COMMANDER = XCommanders.boot().get(30L, SECONDS);
       Thread.sleep(2_000L);
-      COMMANDER.setTestCount(Integer.toUnsignedLong(TESTS_EXPECTED.size()));
 
       TESTS_EXPECTED.forEach(identifier -> {
         COMMANDER.setTestState(new XCTestInfo(
@@ -175,6 +175,53 @@ public final class XoExtension
   }
 
   @Override
+  public void dynamicTestRegistered(
+    final TestIdentifier testIdentifier)
+  {
+    COMMANDER.setTestState(
+      new XCTestInfo(
+        OffsetDateTime.now(),
+        testIdentifier.getUniqueId(),
+        testIdentifier.getDisplayName(),
+        INITIAL
+      )
+    );
+  }
+
+  @Override
+  public void executionStarted(
+    final TestIdentifier testIdentifier)
+  {
+    COMMANDER.setTestState(
+      new XCTestInfo(
+        OffsetDateTime.now(),
+        testIdentifier.getUniqueId(),
+        testIdentifier.getDisplayName(),
+        XCTestState.RUNNING
+      )
+    );
+  }
+
+  @Override
+  public void executionFinished(
+    final TestIdentifier testIdentifier,
+    final TestExecutionResult testExecutionResult)
+  {
+    COMMANDER.setTestState(
+      new XCTestInfo(
+        OffsetDateTime.now(),
+        testIdentifier.getUniqueId(),
+        testIdentifier.getDisplayName(),
+        switch (testExecutionResult.getStatus()) {
+          case FAILED -> FAILED;
+          case ABORTED -> FAILED;
+          case SUCCESSFUL -> SUCCEEDED;
+        }
+      )
+    );
+  }
+
+  @Override
   public Object resolveParameter(
     final ParameterContext parameterContext,
     final ExtensionContext extensionContext)
@@ -193,7 +240,7 @@ public final class XoExtension
 
     if (Objects.equals(requiredType, XCKeyMap.class)) {
       try {
-        return COMMANDER.keyMap().get(10L, TimeUnit.SECONDS);
+        return COMMANDER.keyMap().get(30L, SECONDS);
       } catch (final Exception e) {
         throw new ParameterResolutionException(e.getMessage(), e);
       }
@@ -201,7 +248,7 @@ public final class XoExtension
 
     if (Objects.equals(requiredType, XCRobotType.class)) {
       try {
-        return COMMANDER.robot().get(10L, TimeUnit.SECONDS);
+        return COMMANDER.robot().get(30L, SECONDS);
       } catch (final Exception e) {
         throw new ParameterResolutionException(e.getMessage(), e);
       }
@@ -224,7 +271,7 @@ public final class XoExtension
 
     try {
       final var bot =
-        COMMANDER.robot().get(5L, TimeUnit.SECONDS);
+        COMMANDER.robot().get(5L, SECONDS);
       bot.reset();
     } catch (final Exception e) {
       LOG.error("error resetting input: ", e);
@@ -235,7 +282,7 @@ public final class XoExtension
      */
 
     COMMANDER.stageCloseAll()
-      .get(5L, TimeUnit.SECONDS);
+      .get(5L, SECONDS);
   }
 
   @Override

@@ -41,15 +41,6 @@ public interface XCCommanderType extends AutoCloseable
   void setTestState(XCTestInfo test);
 
   /**
-   * Set the expected number of tests.
-   *
-   * @param count The test count
-   */
-
-  @XCOnAnyThread
-  void setTestCount(long count);
-
-  /**
    * Determine the current keyboard map and return it.
    *
    * @return The keyboard map
