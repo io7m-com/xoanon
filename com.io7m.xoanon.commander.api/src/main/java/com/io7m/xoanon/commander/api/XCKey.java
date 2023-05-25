@@ -18,6 +18,7 @@ package com.io7m.xoanon.commander.api;
 
 import javafx.scene.input.KeyCode;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -34,6 +35,7 @@ public record XCKey(
   boolean isShift,
   boolean isAlt,
   boolean isControl)
+  implements Serializable
 {
   /**
    * A specific key.

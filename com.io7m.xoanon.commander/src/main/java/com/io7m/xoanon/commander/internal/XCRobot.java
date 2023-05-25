@@ -14,7 +14,6 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
 package com.io7m.xoanon.commander.internal;
 
 import com.io7m.xoanon.commander.api.XCFXThread;
@@ -44,6 +43,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
@@ -74,7 +74,10 @@ public final class XCRobot implements XCRobotType
   private final XCKeyMap keyMap;
   private final Robot robot;
   private final AtomicBoolean slowMotion;
-  private long timeout;
+  private volatile long timeout;
+  private volatile long timePauseAfterMouseOp;
+  private volatile long timePauseBetweenDoubleClick;
+  private volatile long timePauseAfterKeyboardOp;
 
   /**
    * The basic bot implementation.
@@ -93,12 +96,19 @@ public final class XCRobot implements XCRobotType
       Objects.requireNonNull(inBaseRobot, "inBaseRobot");
     this.timeout =
       1000L;
+    this.timePauseAfterMouseOp =
+      150L;
+    this.timePauseAfterKeyboardOp =
+      48L;
+    this.timePauseBetweenDoubleClick =
+      50L;
+
     this.slowMotion =
       new AtomicBoolean(false);
   }
 
   @XCOnFXThread
-  private static Node findWithTextSearch(
+  private static Node opSearchWithText(
     final Node node,
     final String text)
   {
@@ -110,7 +120,7 @@ public final class XCRobot implements XCRobotType
 
     if (node instanceof final Parent parent) {
       for (final var child : parent.getChildrenUnmodifiable()) {
-        final var result = findWithTextSearch(child, text);
+        final var result = opSearchWithText(child, text);
         if (result != null) {
           return result;
         }
@@ -121,7 +131,30 @@ public final class XCRobot implements XCRobotType
   }
 
   @XCOnFXThread
-  private static <T> void findWithTypeSearch(
+  private static <T> void opSearchWithClass(
+    final LinkedList<T> results,
+    final Class<T> clazz,
+    final Node node,
+    final String cssClass)
+  {
+    final boolean ofType =
+      clazz.isAssignableFrom(node.getClass());
+    final boolean hasClass =
+      node.getStyleClass().contains(cssClass);
+
+    if (ofType && hasClass) {
+      results.add(clazz.cast(node));
+    }
+
+    if (node instanceof final Parent parent) {
+      for (final var child : parent.getChildrenUnmodifiable()) {
+        opSearchWithClass(results, clazz, child, cssClass);
+      }
+    }
+  }
+
+  @XCOnFXThread
+  private static <T> void opSearchWithType(
     final Collection<T> results,
     final Class<T> clazz,
     final Node node)
@@ -132,7 +165,7 @@ public final class XCRobot implements XCRobotType
 
     if (node instanceof final Parent parent) {
       for (final var child : parent.getChildrenUnmodifiable()) {
-        findWithTypeSearch(results, clazz, child);
+        opSearchWithType(results, clazz, child);
       }
     }
   }
@@ -148,11 +181,16 @@ public final class XCRobot implements XCRobotType
     final var title = stage.getTitle();
     LOG.trace("bringing stage {} ({}) to front", stage, title);
     stage.toFront();
+    stage.requestFocus();
   }
 
-  private static void next()
+  @XCOnFXThread
+  private static boolean opStageIsFront(
+    final Node node)
   {
-    Platform.requestNextPulse();
+    final var scene = node.getScene();
+    final var window = scene.getWindow();
+    return window.isShowing() && window.isFocused();
   }
 
   @XCOnFXThread
@@ -161,7 +199,19 @@ public final class XCRobot implements XCRobotType
     final Parent root)
   {
     final var results = new LinkedList<T>();
-    findWithTypeSearch(results, clazz, root);
+    opSearchWithType(results, clazz, root);
+    return results;
+  }
+
+
+  @XCOnFXThread
+  private static <T> List<T> findAllWithClassInner(
+    final Class<T> clazz,
+    final Parent root,
+    final String cssClass)
+  {
+    final var results = new LinkedList<T>();
+    opSearchWithClass(results, clazz, root, cssClass);
     return results;
   }
 
@@ -239,33 +289,27 @@ public final class XCRobot implements XCRobotType
   {
     if (code.isShift()) {
       Platform.runLater(() -> this.opKeyPress(SHIFT));
-      next();
     }
     if (code.isAlt()) {
       Platform.runLater(() -> this.opKeyPress(ALT));
-      next();
     }
     if (code.isControl()) {
       Platform.runLater(() -> this.opKeyPress(CONTROL));
-      next();
     }
 
     Platform.runLater(() -> this.opKeyType(code.code()));
-    next();
 
     if (code.isControl()) {
       Platform.runLater(() -> this.opKeyRelease(CONTROL));
-      next();
     }
     if (code.isAlt()) {
       Platform.runLater(() -> this.opKeyRelease(ALT));
-      next();
     }
     if (code.isShift()) {
       Platform.runLater(() -> this.opKeyRelease(SHIFT));
-      next();
     }
-    this.pause();
+
+    this.pauseAfterKeyboardOp();
   }
 
   @Override
@@ -312,6 +356,45 @@ public final class XCRobot implements XCRobotType
   }
 
   @Override
+  public long timePauseAfterMouseOperationMilliseconds()
+  {
+    return this.timePauseAfterMouseOp;
+  }
+
+  @Override
+  public void setTimePauseAfterMouseOperationMilliseconds(
+    final long ms)
+  {
+    this.timePauseAfterMouseOp = Math.max(1L, ms);
+  }
+
+  @Override
+  public long timePauseAfterKeyboardOperationMilliseconds()
+  {
+    return this.timePauseAfterKeyboardOp;
+  }
+
+  @Override
+  public void setTimePauseAfterKeyboardOperationMilliseconds(
+    final long ms)
+  {
+    this.timePauseAfterKeyboardOp = Math.max(1L, ms);
+  }
+
+  @Override
+  public long timePauseBetweenDoubleClickMilliseconds()
+  {
+    return this.timePauseBetweenDoubleClick;
+  }
+
+  @Override
+  public void setTimePauseBetweenDoubleClickMilliseconds(
+    final long ms)
+  {
+    this.timePauseBetweenDoubleClick = Math.max(1L, ms);
+  }
+
+  @Override
   public void waitForStageToClose(
     final Stage stage,
     final long milliseconds)
@@ -345,11 +428,9 @@ public final class XCRobot implements XCRobotType
     return this.evaluate(() -> {
       final var scene = stage.getScene();
       if (scene != null) {
-        final var root = scene.getRoot();
-        return findAllInner(clazz, root);
-      } else {
-        return List.of();
+        return findAllInner(clazz, scene.getRoot());
       }
+      return List.of();
     });
   }
 
@@ -359,66 +440,53 @@ public final class XCRobot implements XCRobotType
     final Parent parent)
     throws Exception
   {
-    return this.evaluate(() -> {
-      return findAllInner(clazz, parent);
-    });
+    return this.evaluate(() -> findAllInner(clazz, parent));
   }
 
   @Override
-  public Node findWithIdInAnyStage(
-    final String id)
-    throws Exception
-  {
-    return this.evaluate(() -> {
-      final var windows =
-        Window.getWindows()
-          .stream()
-          .map(w -> (Stage) w)
-          .filter(Window::isShowing)
-          .toList();
-
-      for (final var window : windows) {
-        final var scene = window.getScene();
-        if (scene != null) {
-          final var root = scene.getRoot();
-          final var result = root.lookup("#" + id);
-          if (result != null) {
-            return result;
-          }
-        }
-      }
-
-      throw new NoSuchElementException(
-        "No element with ID: %s".formatted(id)
-      );
-    });
-  }
-
-  @Override
-  public Node findWithId(
+  public <T extends Node> T findWithId(
+    final Class<T> clazz,
     final Stage stage,
     final String id)
     throws Exception
   {
     return this.evaluate(() -> {
-      final var scene =
-        stage.getScene();
-      final var root =
-        scene.getRoot();
+      final var scene = stage.getScene();
+      if (scene != null) {
+        final var result = scene.getRoot().lookup("#" + id);
+        if (result != null) {
+          return clazz.cast(result);
+        }
+      }
 
+      throw new NoSuchElementException(
+        "No element with id '%s'".formatted(id)
+      );
+    });
+  }
+
+  @Override
+  public <T extends Node> T findWithId(
+    final Class<T> clazz,
+    final Parent root,
+    final String id)
+    throws Exception
+  {
+    return this.evaluate(() -> {
       final var result = root.lookup("#" + id);
-      if (result == null) {
-        throw new NoSuchElementException(
-          "No element with ID: %s".formatted(id)
-        );
+      if (result != null) {
+        return clazz.cast(result);
       }
 
-      return result;
+      throw new NoSuchElementException(
+        "No element with id '%s'".formatted(id)
+      );
     });
   }
 
   @Override
-  public Node findWithTextInAnyStage(
+  public <T extends Node> T findWithTextInAnyStage(
+    final Class<T> clazz,
     final String text)
     throws Exception
   {
@@ -433,58 +501,138 @@ public final class XCRobot implements XCRobotType
       for (final var window : windows) {
         final var scene = window.getScene();
         if (scene != null) {
-          final var root = scene.getRoot();
-          final var result = findWithTextSearch(root, text);
+          final var result = opSearchWithText(scene.getRoot(), text);
           if (result != null) {
-            return result;
+            return clazz.cast(result);
           }
         }
       }
 
       throw new NoSuchElementException(
-        "No element with text: %s".formatted(text)
+        "No element with text '%s'".formatted(text)
       );
     });
   }
 
   @Override
-  public Node findWithText(
+  public <T extends Node> T findWithText(
+    final Class<T> clazz,
     final Stage stage,
     final String text)
     throws Exception
   {
     return this.evaluate(() -> {
-      final var scene =
-        stage.getScene();
-      final var root =
-        scene.getRoot();
-
-      final var result = findWithTextSearch(root, text);
-      if (result == null) {
-        throw new NoSuchElementException(
-          "No element with text: %s".formatted(text)
-        );
+      final var scene = stage.getScene();
+      if (scene != null) {
+        final var result = opSearchWithText(scene.getRoot(), text);
+        if (result != null) {
+          return clazz.cast(result);
+        }
       }
 
-      return result;
+      throw new NoSuchElementException(
+        "No element with text '%s'".formatted(text)
+      );
     });
   }
 
   @Override
-  public Node findWithText(
+  public <T extends Node> T findWithText(
+    final Class<T> clazz,
     final Parent parent,
     final String text)
     throws Exception
   {
     return this.evaluate(() -> {
-      final var result = findWithTextSearch(parent, text);
-      if (result == null) {
-        throw new NoSuchElementException(
-          "No element with text: %s".formatted(text)
-        );
+      final var result = opSearchWithText(parent, text);
+      if (result != null) {
+        return clazz.cast(result);
       }
 
-      return result;
+      throw new NoSuchElementException(
+        "No element with text '%s'".formatted(text)
+      );
+    });
+  }
+
+  @Override
+  public <T extends Node> T findWithIdInAnyStage(
+    final Class<T> clazz,
+    final String id)
+    throws Exception
+  {
+    return this.evaluate(() -> {
+      final var windows =
+        Window.getWindows()
+          .stream()
+          .map(w -> (Stage) w)
+          .filter(Window::isShowing)
+          .toList();
+
+      for (final var window : windows) {
+        final var scene = window.getScene();
+        if (scene != null) {
+          final var result = scene.getRoot().lookup("#" + id);
+          if (result != null) {
+            return clazz.cast(result);
+          }
+        }
+      }
+
+      throw new NoSuchElementException(
+        "No element with id '%s'".formatted(id)
+      );
+    });
+  }
+
+  @Override
+  public <T extends Node> List<T> findAllWithClassInStage(
+    final Class<T> clazz,
+    final Stage stage,
+    final String cssClass)
+    throws Exception
+  {
+    return this.evaluate(() -> {
+      final var scene = stage.getScene();
+      if (scene != null) {
+        return findAllWithClassInner(clazz, scene.getRoot(), cssClass);
+      }
+      return List.of();
+    });
+  }
+
+  @Override
+  public <T extends Node> List<T> findAllWithClass(
+    final Class<T> clazz,
+    final Parent parent,
+    final String cssClass)
+    throws Exception
+  {
+    return this.evaluate(() -> findAllWithClassInner(clazz, parent, cssClass));
+  }
+
+  @Override
+  public <T extends Node> List<T> findAllWithClassInAnyStage(
+    final Class<T> clazz,
+    final String cssClass)
+    throws Exception
+  {
+    return this.evaluate(() -> {
+      final var windows =
+        Window.getWindows()
+          .stream()
+          .map(w -> (Stage) w)
+          .filter(Window::isShowing)
+          .toList();
+
+      final var results = new LinkedList<T>();
+      for (final var window : windows) {
+        final var scene = window.getScene();
+        if (scene != null) {
+          opSearchWithClass(results, clazz, scene.getRoot(), cssClass);
+        }
+      }
+      return results;
     });
   }
 
@@ -494,18 +642,12 @@ public final class XCRobot implements XCRobotType
     throws Exception
   {
     Platform.runLater(() -> opBringStageToFront(node));
-    next();
-
+    this.waitUntil(this.timeout, () -> opStageIsFront(node));
     this.execute(() -> this.opPointMouseAt(node));
-    next();
-
-    Platform.runLater(() -> this.opMousePress(MouseButton.PRIMARY));
-    next();
-
-    Platform.runLater(() -> this.opMouseRelease(MouseButton.PRIMARY));
-    next();
-
-    this.pause();
+    this.pauseAfterMouseOp();
+    this.execute(() -> this.opMousePress(MouseButton.PRIMARY));
+    this.execute(() -> this.opMouseRelease(MouseButton.PRIMARY));
+    this.pauseAfterMouseOp();
   }
 
   @Override
@@ -514,26 +656,14 @@ public final class XCRobot implements XCRobotType
     throws Exception
   {
     Platform.runLater(() -> opBringStageToFront(node));
-    next();
-
+    this.waitUntil(this.timeout, () -> opStageIsFront(node));
     this.execute(() -> this.opPointMouseAt(node));
-    next();
-
-    Platform.runLater(() -> this.opMousePress(MouseButton.PRIMARY));
-    next();
-
-    Platform.runLater(() -> this.opMouseRelease(MouseButton.PRIMARY));
-    next();
-
-    Thread.sleep(50L);
-
-    Platform.runLater(() -> this.opMousePress(MouseButton.PRIMARY));
-    next();
-
-    Platform.runLater(() -> this.opMouseRelease(MouseButton.PRIMARY));
-    next();
-
-    this.pause();
+    this.execute(() -> this.opMousePress(MouseButton.PRIMARY));
+    this.execute(() -> this.opMouseRelease(MouseButton.PRIMARY));
+    Thread.sleep(this.timePauseBetweenDoubleClick);
+    this.execute(() -> this.opMousePress(MouseButton.PRIMARY));
+    this.execute(() -> this.opMouseRelease(MouseButton.PRIMARY));
+    this.pauseAfterMouseOp();
   }
 
   @Override
@@ -542,18 +672,27 @@ public final class XCRobot implements XCRobotType
     throws Exception
   {
     Platform.runLater(() -> opBringStageToFront(node));
-    next();
-
+    this.waitUntil(this.timeout, () -> opStageIsFront(node));
     this.execute(() -> this.opPointMouseAt(node));
-    next();
-
-    this.pause();
+    this.pauseAfterMouseOp();
   }
 
-  private void pause()
+  private void pauseAfterKeyboardOp()
   {
     try {
-      final var time = this.slowMotion.get() ? 1000L : 16L * 2L;
+      final var time =
+        this.slowMotion.get() ? 1000L : this.timePauseAfterKeyboardOp;
+      Thread.sleep(time);
+    } catch (final InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
+  }
+
+  private void pauseAfterMouseOp()
+  {
+    try {
+      final var time =
+        this.slowMotion.get() ? 1000L : this.timePauseAfterMouseOp;
       Thread.sleep(time);
     } catch (final InterruptedException e) {
       Thread.currentThread().interrupt();
@@ -567,10 +706,9 @@ public final class XCRobot implements XCRobotType
     throws Exception
   {
     Platform.runLater(() -> opBringStageToFront(node));
-    next();
-
+    this.waitUntil(this.timeout, () -> opStageIsFront(node));
     this.execute(() -> this.opPointMouseAt(node));
-    next();
+    this.pauseAfterMouseOp();
 
     for (final var code : codes) {
       LOG.trace("code {}", code);
@@ -579,8 +717,6 @@ public final class XCRobot implements XCRobotType
     for (final var code : codes) {
       this.typeKey(code);
     }
-
-    this.pause();
   }
 
   @Override
@@ -598,7 +734,55 @@ public final class XCRobot implements XCRobotType
   }
 
   @Override
-  public void sleepForFrames(
+  public void type(
+    final List<XCKey> codes)
+  {
+    for (final var code : codes) {
+      LOG.trace("code {}", code);
+    }
+
+    for (final var code : codes) {
+      this.typeKey(code);
+    }
+  }
+
+  @Override
+  public void typeText(
+    final String text)
+  {
+    final var characters =
+      text.chars()
+        .mapToObj(i -> Character.valueOf((char) i))
+        .toList();
+
+    this.type(this.keyMap.toCodes(characters));
+  }
+
+  @Override
+  public void typeRaw(
+    final KeyCode code)
+    throws Exception
+  {
+    this.execute(() -> this.robot.keyType(code));
+    this.pauseAfterKeyboardOp();
+  }
+
+  @Override
+  public void typeRaw(
+    final Node node,
+    final KeyCode code)
+    throws Exception
+  {
+    Platform.runLater(() -> opBringStageToFront(node));
+    this.waitUntil(this.timeout, () -> opStageIsFront(node));
+    this.execute(() -> this.opPointMouseAt(node));
+    this.pauseAfterMouseOp();
+    this.execute(() -> this.robot.keyType(code));
+    this.pauseAfterKeyboardOp();
+  }
+
+  @Override
+  public void waitForFrames(
     final int frames)
     throws Exception
   {
@@ -642,9 +826,21 @@ public final class XCRobot implements XCRobotType
   }
 
   @Override
-  public void reset()
+  public void reset(
+    final Optional<Window> window)
+    throws Exception
   {
     this.slowMotionDisable();
+
+    if (window.isPresent()) {
+      this.execute(() -> {
+        final var actual = window.get();
+        final var scene = actual.getScene();
+        final var root = scene.getRoot();
+        opBringStageToFront(root);
+        this.opPointMouseAt(root);
+      });
+    }
 
     for (final var code : ALL_KEY_CODES) {
       Platform.runLater(() -> this.opKeyRelease(code));

@@ -32,6 +32,13 @@ import java.util.function.Consumer;
 public interface XCCommanderType extends AutoCloseable
 {
   /**
+   * @return The commander's own stage
+   */
+
+  @XCOnFXThread
+  Stage stage();
+
+  /**
    * Set the state of a given test.
    *
    * @param test The test
@@ -73,16 +80,6 @@ public interface XCCommanderType extends AutoCloseable
 
   @XCOnAnyThread
   CompletableFuture<Stage> stageNew(Consumer<Stage> onCreate);
-
-  /**
-   * Register a stage for closing by {@link #stageCloseAll()}. This
-   * is implicitly called by {@link #stageNew(Consumer)}.
-   *
-   * @param stage The stage
-   */
-
-  @XCOnAnyThread
-  void stageRegisterForClosing(Stage stage);
 
   /**
    * Create a new stage, initializing it using the given function.

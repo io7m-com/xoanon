@@ -14,27 +14,42 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+package com.io7m.xoanon.commander.internal;
+
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.stage.Window;
+import javafx.util.Callback;
+
+import java.util.Objects;
+
 /**
- * JUnit 5 JavaFX test harness (Commander implementation)
+ * A factory of cells.
  */
 
-open module com.io7m.xoanon.commander
+public final class XBWindowCellFactory
+  implements Callback<
+  ListView<Window>,
+  ListCell<Window>>
 {
-  requires static org.osgi.annotation.versioning;
-  requires static org.osgi.annotation.bundle;
+  private final XBStrings strings;
 
-  requires transitive com.io7m.xoanon.commander.api;
+  /**
+   * A factory of cells.
+   *
+   * @param inStrings The strings
+   */
 
-  requires com.io7m.jxtrand.vanilla;
+  public XBWindowCellFactory(
+    final XBStrings inStrings)
+  {
+    this.strings = Objects.requireNonNull(inStrings, "inStrings");
+  }
 
-  requires javafx.base;
-  requires javafx.controls;
-  requires javafx.fxml;
-  requires javafx.graphics;
-  requires org.slf4j;
-
-  exports com.io7m.xoanon.commander;
-
-  exports com.io7m.xoanon.commander.internal
-    to com.io7m.xoanon.tests;
+  @Override
+  public ListCell<Window> call(
+    final ListView<Window> param)
+  {
+    return new XBWindowCell(this.strings);
+  }
 }

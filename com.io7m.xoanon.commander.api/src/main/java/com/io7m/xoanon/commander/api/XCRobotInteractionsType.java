@@ -18,6 +18,7 @@
 package com.io7m.xoanon.commander.api;
 
 import javafx.scene.Node;
+import javafx.scene.input.KeyCode;
 
 import java.util.List;
 
@@ -86,5 +87,55 @@ public interface XCRobotInteractionsType
   void typeText(
     Node node,
     String text)
+    throws Exception;
+
+  /**
+   * Type the given key codes on whatever happens to be in focus right now.
+   *
+   * @param codes The codes
+   *
+   * @throws Exception On errors
+   */
+
+  void type(
+    List<XCKey> codes)
+    throws Exception;
+
+  /**
+   * Type the given key codes on whatever happens to be in focus right now.
+   *
+   * @param text The text
+   *
+   * @throws Exception On errors
+   */
+
+  void typeText(
+    String text)
+    throws Exception;
+
+  /**
+   * Type a raw key code on whatever happens to be in focus right now.
+   *
+   * @param code The codes
+   *
+   * @throws Exception On errors
+   */
+
+  void typeRaw(
+    KeyCode code)
+    throws Exception;
+
+  /**
+   * Type a raw key code on the given node.
+   *
+   * @param node The node
+   * @param code The codes
+   *
+   * @throws Exception On errors
+   */
+
+  void typeRaw(
+    Node node,
+    KeyCode code)
     throws Exception;
 }

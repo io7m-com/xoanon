@@ -28,6 +28,7 @@ import com.io7m.xoanon.commander.api.XCTestState;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -44,12 +45,16 @@ import javafx.scene.layout.Pane;
 import javafx.scene.robot.Robot;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
+import java.nio.file.Paths;
+import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -63,7 +68,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -130,10 +134,11 @@ public final class XCCommander
   private final Stage stage;
   private final ObservableList<XCTestInfo> testsList;
   private final AtomicReference<XCKeyMap> keyMap;
+  private final XCKeyMapCache keyMapCache;
+  private final AtomicReference<XCRobot> robot;
   private final Robot baseRobot;
   private final AtomicBoolean testsStarted;
   private final OffsetDateTime timeStarted;
-  private final ConcurrentLinkedQueue<Stage> stagesCreated;
   private final Set<String> testsRegistered;
   private volatile int stagesCreatedCount;
   private volatile int stagesReleasedCount;
@@ -146,6 +151,7 @@ public final class XCCommander
   @FXML private Parent splash;
   @FXML private Parent diagnostics;
   @FXML private ListView<XCTestInfo> tests;
+  @FXML private ListView<Window> windowListView;
   @FXML private Pane info;
   @FXML private ProgressBar progress;
   @FXML private Label testVersion;
@@ -209,14 +215,15 @@ public final class XCCommander
       FXCollections.observableArrayList();
     this.keyMap =
       new AtomicReference<>();
+    this.keyMapCache =
+      new XCKeyMapCache(
+        Clock.systemUTC(),
+        Paths.get(System.getProperty("java.io.tmpdir"))
+      );
+    this.robot =
+      new AtomicReference<>();
     this.baseRobot =
       new Robot();
-
-    this.stagesCreatedCount = 0;
-    this.stagesReleasedCount = 0;
-
-    this.stagesCreated =
-      new ConcurrentLinkedQueue<Stage>();
   }
 
   /*
@@ -339,9 +346,9 @@ public final class XCCommander
     this.dataExecutionId.setText(execId.toString());
     LOG.info("execution ID: {}", execId);
 
-    this.testVersion.setText(
-      "Xoanon Test Harness %s".formatted(XBVersion.MAIN_VERSION)
-    );
+    final var title = "Xoanon Test Harness %s".formatted(XBVersion.MAIN_VERSION);
+    this.testVersion.setText(title);
+    this.stage.setTitle(title);
 
     this.splash.setFocusTraversable(false);
     this.splash.setMouseTransparent(true);
@@ -358,6 +365,9 @@ public final class XCCommander
     this.tests.setCellFactory(new XBTestCellFactory(this.strings));
     this.tests.setItems(this.testsList);
 
+    this.windowListView.setFixedCellSize(16.0);
+    this.windowListView.setCellFactory(new XBWindowCellFactory(this.strings));
+
     this.status.setText("Waiting...");
     this.statusName.setText(this.testsStateWorst.name());
 
@@ -370,6 +380,46 @@ public final class XCCommander
 
     this.executor.scheduleAtFixedRate(
       this::updateHeap, 0L, 1L, TimeUnit.SECONDS);
+
+    Window.getWindows()
+      .addListener(XCCommander.this::onWindowsChanged);
+  }
+
+  private void onWindowsChanged(
+    final ListChangeListener.Change<? extends Window> c)
+  {
+    while (c.next()) {
+      if (c.wasAdded()) {
+        for (final var w : c.getAddedSubList()) {
+          final var title = (w instanceof final Stage s) ? s.getTitle() : "";
+          LOG.debug("window created: [{}] ({})", w, title);
+          ++this.stagesCreatedCount;
+          this.dataStagesCreated.setText(
+            Integer.toString(this.stagesCreatedCount)
+          );
+        }
+      }
+
+      if (c.wasRemoved()) {
+        for (final var w : c.getRemoved()) {
+          final var title = (w instanceof final Stage s) ? s.getTitle() : "";
+          LOG.debug("window removed: [{}] ({})", w, title);
+          ++this.stagesReleasedCount;
+          this.dataStagesReleased.setText(
+            Integer.toString(this.stagesCreatedCount)
+          );
+        }
+      }
+    }
+
+    final var windowsNow = List.copyOf(Window.getWindows());
+    this.windowListView.setItems(FXCollections.observableList(windowsNow));
+
+    for (var index = 0; index < windowsNow.size(); ++index) {
+      final var window = windowsNow.get(index);
+      final var title = (window instanceof final Stage s) ? s.getTitle() : "";
+      LOG.debug("window [{}] {} {}", Integer.valueOf(index), window, title);
+    }
   }
 
   private void updateHeap()
@@ -460,6 +510,12 @@ public final class XCCommander
   }
 
   @Override
+  public Stage stage()
+  {
+    return this.stage;
+  }
+
+  @Override
   public void setTestState(
     final XCTestInfo test)
   {
@@ -533,7 +589,7 @@ public final class XCCommander
     final var future = new CompletableFuture<XCKeyMap>();
     this.executor.execute(() -> {
       try {
-        future.complete(this.generateKeyMap());
+        future.complete(this.keyMapLoadCachedOrGenerate());
       } catch (final Throwable e) {
         future.completeExceptionally(e);
       }
@@ -550,8 +606,17 @@ public final class XCCommander
   @Override
   public CompletableFuture<XCRobotType> robot()
   {
+    final var existing = this.robot.get();
+    if (existing != null) {
+      return CompletableFuture.completedFuture(existing);
+    }
+
     return this.keyMap()
-      .thenApply(k -> new XCRobot(k, this.baseRobot));
+      .thenApply(k -> {
+        final var newRobot = new XCRobot(k, this.baseRobot);
+        this.robot.set(newRobot);
+        return newRobot;
+      });
   }
 
   @Override
@@ -570,7 +635,6 @@ public final class XCCommander
         newStage.show();
         newStage.toFront();
 
-        this.stageRegister(newStage);
         onCreate.accept(newStage);
         return newStage;
       });
@@ -592,30 +656,17 @@ public final class XCCommander
   }
 
   @Override
-  public void stageRegisterForClosing(
-    final Stage newStage)
-  {
-    Platform.runLater(() -> this.stageRegister(newStage));
-  }
-
-  private void stageRegister(
-    final Stage newStage)
-  {
-    ++this.stagesCreatedCount;
-    this.dataStagesCreated.setText(
-      Integer.toString(this.stagesCreatedCount)
-    );
-    this.stagesCreated.add(newStage);
-  }
-
-  @Override
   public CompletableFuture<Void> stageCloseAll()
   {
     return XCFXThread.run(() -> {
-      final var windows = List.copyOf(this.stagesCreated);
-      this.stagesCreated.clear();
-      this.stagesReleasedCount += windows.size();
-      this.dataStagesReleased.setText(Integer.toString(this.stagesReleasedCount));
+      final var windows =
+        Window.getWindows()
+          .stream()
+          .filter(window -> !Objects.equals(window, this.stage))
+          .filter(window -> window.isShowing())
+          .filter(window -> window instanceof Stage)
+          .map(Stage.class::cast)
+          .toList();
 
       for (final var window : windows) {
         try {
@@ -658,6 +709,34 @@ public final class XCCommander
     );
   }
 
+  /*
+   * Check if there's a suitable cached keymap. If there isn't, generate one.
+   */
+
+  private XCKeyMap keyMapLoadCachedOrGenerate()
+  {
+    final var cached = this.keyMapCache.load();
+    if (cached.isPresent()) {
+      final var newMap = cached.get();
+      this.keyMap.set(newMap);
+      return newMap;
+    }
+
+    for (var attempt = 0; attempt < 3; ++attempt) {
+      final XCKeyMap generated;
+      try {
+        generated = this.keyMapGenerate();
+        this.keyMap.set(generated);
+        this.keyMapCache.save(generated);
+        return generated;
+      } catch (final Exception e) {
+        // Failed to generate a keymap
+      }
+    }
+
+    throw new IllegalStateException("Failed to generate a keymap.");
+  }
+
   /**
    * Generate a keymap by pressing every non-special key on the keyboard
    * and recording what happens. The mapping can then be used to work backwards
@@ -668,14 +747,24 @@ public final class XCCommander
    * @throws Exception On errors
    */
 
-  private XCKeyMap generateKeyMap()
+  private XCKeyMap keyMapGenerate()
     throws Exception
   {
     try {
+
+      /*
+       * For keymap generation, the commander window must be at the front.
+       */
+
+      Platform.runLater(this.stage::toFront);
       Thread.sleep(250L);
 
       Platform.runLater(() -> {
         this.input.setDisable(false);
+      });
+
+      Platform.runLater(() -> {
+        this.input.requestFocus();
       });
 
       Platform.runLater(() -> {
@@ -697,8 +786,8 @@ public final class XCCommander
           );
         });
 
-        for (int attempt = 0; attempt < 2; ++attempt) {
-          this.generateKeyMapOneCharacter(newMappings, code);
+        for (var attempt = 0; attempt < 2; ++attempt) {
+          this.keyMapGenerateOneCharacter(newMappings, code);
         }
 
         Platform.requestNextPulse();
@@ -725,6 +814,11 @@ public final class XCCommander
       LOG.debug(
         "Generated key map of size {}",
         Integer.valueOf(newMappings.size()));
+
+      if (newMappings.size() < 88) {
+        throw new IOException("Key mappings incomplete: >= 88 keys required.");
+      }
+
       final var result = new XCKeyMap(Map.copyOf(newMappings));
       this.keyMap.set(result);
       return result;
@@ -737,7 +831,7 @@ public final class XCCommander
     }
   }
 
-  private void generateKeyMapOneCharacter(
+  private void keyMapGenerateOneCharacter(
     final ConcurrentHashMap<Character, XCKey> newMappings,
     final KeyCode code)
   {
@@ -755,11 +849,11 @@ public final class XCCommander
       this.baseRobot.mouseClick(MouseButton.PRIMARY);
     });
 
-    this.generateKeyMapOneCharacterNoModifiers(newMappings, code);
-    this.generateKeyMapOneCharacterShift(newMappings, code);
+    this.keyMapGenerateOneCharacterNoModifiers(newMappings, code);
+    this.keyMapGenerateOneCharacterShift(newMappings, code);
   }
 
-  private void generateKeyMapOneCharacterShift(
+  private void keyMapGenerateOneCharacterShift(
     final ConcurrentHashMap<Character, XCKey> newMappings,
     final KeyCode code)
   {
@@ -802,7 +896,7 @@ public final class XCCommander
     });
   }
 
-  private void generateKeyMapOneCharacterNoModifiers(
+  private void keyMapGenerateOneCharacterNoModifiers(
     final ConcurrentHashMap<Character, XCKey> newMappings,
     final KeyCode code)
   {

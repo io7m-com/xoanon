@@ -208,3 +208,9 @@
 {
   -fx-background-color: #202020;
 }
+
+.windowListCell .label
+{
+  -fx-font-size:   11pt;
+  -fx-font-family: "Monospaced";
+}

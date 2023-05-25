@@ -14,27 +14,45 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/**
- * JUnit 5 JavaFX test harness (Commander implementation)
- */
 
-open module com.io7m.xoanon.commander
+package com.io7m.xoanon.tests;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+
+public final class XCFakeClock extends Clock
 {
-  requires static org.osgi.annotation.versioning;
-  requires static org.osgi.annotation.bundle;
+  private long time;
 
-  requires transitive com.io7m.xoanon.commander.api;
+  public XCFakeClock()
+  {
+    this.time = 0L;
+  }
 
-  requires com.io7m.jxtrand.vanilla;
+  @Override
+  public ZoneId getZone()
+  {
+    return ZoneId.of("UTC");
+  }
 
-  requires javafx.base;
-  requires javafx.controls;
-  requires javafx.fxml;
-  requires javafx.graphics;
-  requires org.slf4j;
+  @Override
+  public Clock withZone(
+    final ZoneId zone)
+  {
+    return this;
+  }
 
-  exports com.io7m.xoanon.commander;
+  @Override
+  public Instant instant()
+  {
+    ++this.time;
+    return Instant.ofEpochSecond(this.time);
+  }
 
-  exports com.io7m.xoanon.commander.internal
-    to com.io7m.xoanon.tests;
+  public void setTime(
+    final Instant newTime)
+  {
+    this.time = newTime.getEpochSecond();
+  }
 }

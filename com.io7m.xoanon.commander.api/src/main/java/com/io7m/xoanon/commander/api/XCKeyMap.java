@@ -17,6 +17,7 @@
 
 package com.io7m.xoanon.commander.api;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.Optional;
 
 public record XCKeyMap(
   Map<Character, XCKey> keys)
+  implements Serializable
 {
   /**
    * @return An empty mapping

@@ -28,9 +28,12 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -125,7 +128,7 @@ public final class XoExtensionTest
   }
 
   @Test
-  public void testTextFieldTextFind(
+  public void testFindWithId(
     final XCRobotType bot,
     final XCCommanderType commander)
     throws Exception
@@ -151,7 +154,69 @@ public final class XoExtensionTest
   }
 
   @Test
-  public void testTextFieldTextFindNonexistentId(
+  public void testFindWithTextInAnyStage(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var text =
+      new AtomicReference<Label>();
+
+    commander.stageNewAndWait(newStage -> {
+      final var field = new Label();
+      text.set(field);
+      field.setText("ABCDEFGH");
+      newStage.setScene(new Scene(field));
+    });
+
+    final var node = bot.findWithTextInAnyStage("ABCDEFGH");
+    assertEquals(text.get(), node);
+  }
+
+  @Test
+  public void testFindWithText(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var text =
+      new AtomicReference<Label>();
+
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+        final var field = new Label();
+        text.set(field);
+        field.setText("ABCDEFGH");
+        newStage.setScene(new Scene(field));
+      });
+
+    final var node = bot.findWithText(stage, "ABCDEFGH");
+    assertEquals(text.get(), node);
+  }
+
+  @Test
+  public void testFindWithTextParent(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var text =
+      new AtomicReference<Label>();
+
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+        final var field = new Label();
+        text.set(field);
+        field.setText("ABCDEFGH");
+        newStage.setScene(new Scene(field));
+      });
+
+    final var node = bot.findWithText(stage.getScene().getRoot(), "ABCDEFGH");
+    assertEquals(text.get(), node);
+  }
+
+  @Test
+  public void testTextFieldTextFindInAnyStageNonexistentId(
     final XCRobotType bot)
   {
     final var ex =
@@ -163,12 +228,71 @@ public final class XoExtensionTest
   }
 
   @Test
-  public void testTextFieldTextFindNonexistentText(
+  public void testTextFieldTextFindInAnyStageNonexistentText(
     final XCRobotType bot)
   {
     final var ex =
       assertThrows(ExecutionException.class, () -> {
         bot.findWithTextInAnyStage("Clearly does not exist.");
+      });
+
+    assertInstanceOf(NoSuchElementException.class, ex.getCause());
+  }
+
+  @Test
+  public void testTextFieldTextFindNonexistentId(
+    final XCCommanderType commander,
+    final XCRobotType bot)
+    throws Exception
+  {
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+
+      });
+
+    final var ex =
+      assertThrows(ExecutionException.class, () -> {
+        bot.findWithId(stage, "x");
+      });
+
+    assertInstanceOf(NoSuchElementException.class, ex.getCause());
+  }
+
+  @Test
+  public void testTextFieldTextFindNonexistentText0(
+    final XCCommanderType commander,
+    final XCRobotType bot)
+    throws Exception
+  {
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+
+      });
+
+    final var ex =
+      assertThrows(ExecutionException.class, () -> {
+        bot.findWithText(stage, "Clearly does not exist.");
+      });
+
+    assertInstanceOf(NoSuchElementException.class, ex.getCause());
+  }
+
+  @Test
+  public void testTextFieldTextFindNonexistentText1(
+    final XCCommanderType commander,
+    final XCRobotType bot)
+    throws Exception
+  {
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+        final var field = new Label();
+        field.setText("ABCDEFGH");
+        newStage.setScene(new Scene(field));
+      });
+
+    final var ex =
+      assertThrows(ExecutionException.class, () -> {
+        bot.findWithText(stage.getScene().getRoot(), "Clearly does not exist.");
       });
 
     assertInstanceOf(NoSuchElementException.class, ex.getCause());
@@ -206,12 +330,12 @@ public final class XoExtensionTest
     throws Exception
   {
     XCFXThread.runVWait(1L, TimeUnit.SECONDS, () -> {
-      final var stage = new Stage();
-      commander.stageRegisterForClosing(stage);
-
-      stage.setWidth(640.0);
-      stage.setHeight(640.0);
-      stage.show();
+      for (int index = 0; index < 10; ++index) {
+        final var stage = new Stage();
+        stage.setWidth(640.0);
+        stage.setHeight(640.0);
+        stage.show();
+      }
     });
   }
 
@@ -328,5 +452,273 @@ public final class XoExtensionTest
 
     final var check = bot.findAllInStage(CheckBox.class, stage);
     assertEquals(List.of(checkRef.get()), check);
+  }
+
+  @Test
+  public void testFindCheckboxById(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var checkRef =
+      new AtomicReference<CheckBox>();
+
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+        final var checkBox = new CheckBox();
+        checkRef.set(checkBox);
+        checkBox.setSelected(false);
+        checkBox.setId("x");
+        newStage.setScene(new Scene(checkBox));
+      });
+
+    final var check = bot.findWithId(CheckBox.class, stage, "x");
+    assertEquals(checkRef.get(), check);
+  }
+
+  @Test
+  public void testWaitFrames(
+    final XCRobotType bot)
+    throws Exception
+  {
+    bot.waitForFrames(60);
+  }
+
+  @Test
+  @Disabled("A disabled test, captured by the test runner.")
+  public void testDisabled()
+  {
+
+  }
+
+  @Test
+  public void testFindAllWithClassInStage0(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var checkRef =
+      new AtomicReference<List<CheckBox>>();
+
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+        final var cb0 = new CheckBox();
+        cb0.getStyleClass().add("a-checkbox");
+        final var cb1 = new CheckBox();
+        cb1.getStyleClass().add("a-checkbox");
+        final var cb2 = new CheckBox();
+        cb2.getStyleClass().add("a-checkbox");
+
+        final var root = new VBox(cb0, cb1, cb2);
+        checkRef.set(List.of(cb0, cb1, cb2));
+        newStage.setScene(new Scene(root));
+      });
+
+    final var check = bot.findAllWithClassInStage(
+      CheckBox.class,
+      stage,
+      "a-checkbox");
+    assertEquals(checkRef.get(), check);
+  }
+
+  @Test
+  public void testFindAllWithClassInStage1(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var checkRef =
+      new AtomicReference<List<CheckBox>>();
+
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+        final var cb0 = new CheckBox();
+        cb0.getStyleClass().add("a-checkbox");
+        final var cb1 = new CheckBox();
+        cb1.getStyleClass().add("a-checkbox");
+        final var cb2 = new CheckBox();
+        cb2.getStyleClass().add("a-checkbox");
+
+        final var root = new VBox(cb0, cb1, cb2);
+        checkRef.set(List.of(cb0, cb1, cb2));
+        newStage.setScene(new Scene(root));
+      });
+
+    final var check = bot.findAllWithClassInStage(
+      CheckBox.class,
+      stage,
+      "b-checkbox");
+    assertEquals(List.of(), check);
+  }
+
+  @Test
+  public void testFindAllWithClassInStage2(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+
+      });
+
+    final var check = bot.findAllWithClassInStage(
+      CheckBox.class,
+      stage,
+      "b-checkbox");
+    assertEquals(List.of(), check);
+  }
+
+  @Test
+  public void testFindAllWithClass0(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var checkRef =
+      new AtomicReference<List<CheckBox>>();
+
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+        final var cb0 = new CheckBox();
+        cb0.getStyleClass().add("a-checkbox");
+        final var cb1 = new CheckBox();
+        cb1.getStyleClass().add("a-checkbox");
+        final var cb2 = new CheckBox();
+        cb2.getStyleClass().add("a-checkbox");
+
+        final var root = new VBox(cb0, cb1, cb2);
+        checkRef.set(List.of(cb0, cb1, cb2));
+        newStage.setScene(new Scene(root));
+      });
+
+    final var check = bot.findAllWithClass(
+      CheckBox.class,
+      stage.getScene().getRoot(),
+      "a-checkbox");
+    assertEquals(checkRef.get(), check);
+  }
+
+  @Test
+  public void testFindAllWithClass1(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var checkRef =
+      new AtomicReference<List<CheckBox>>();
+
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+        final var cb0 = new CheckBox();
+        cb0.getStyleClass().add("a-checkbox");
+        final var cb1 = new CheckBox();
+        cb1.getStyleClass().add("a-checkbox");
+        final var cb2 = new CheckBox();
+        cb2.getStyleClass().add("a-checkbox");
+
+        final var root = new VBox(cb0, cb1, cb2);
+        checkRef.set(List.of(cb0, cb1, cb2));
+        newStage.setScene(new Scene(root));
+      });
+
+    final var check =
+      bot.findAllWithClass(
+        CheckBox.class,
+        stage.getScene().getRoot(),
+        "b-checkbox"
+      );
+    assertEquals(List.of(), check);
+  }
+
+  @Test
+  public void testFindAllWithClass2(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var checkRef =
+      new AtomicReference<List<CheckBox>>();
+
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+        final var cb0 = new CheckBox();
+        cb0.getStyleClass().add("a-checkbox");
+        final var cb1 = new CheckBox();
+        cb1.getStyleClass().add("a-checkbox");
+        final var cb2 = new CheckBox();
+        cb2.getStyleClass().add("a-checkbox");
+
+        final var root = new VBox(cb0, cb1, cb2);
+        checkRef.set(List.of(cb0, cb1, cb2));
+        newStage.setScene(new Scene(root));
+      });
+
+    final var check =
+      bot.findAllWithClassInAnyStage(CheckBox.class, "b-checkbox");
+    assertEquals(List.of(), check);
+  }
+
+  @Test
+  public void testFindAllWithClass3(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var checkRef =
+      new AtomicReference<List<CheckBox>>();
+
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+        final var cb0 = new CheckBox();
+        cb0.getStyleClass().add("a-checkbox");
+        final var cb1 = new CheckBox();
+        cb1.getStyleClass().add("a-checkbox");
+        final var cb2 = new CheckBox();
+        cb2.getStyleClass().add("a-checkbox");
+
+        final var root = new VBox(cb0, cb1, cb2);
+        checkRef.set(List.of(cb0, cb1, cb2));
+        newStage.setScene(new Scene(root));
+      });
+
+    final var check =
+      bot.findAllWithClassInAnyStage(CheckBox.class, "a-checkbox");
+    assertEquals(checkRef.get(), check);
+  }
+
+  @Test
+  public void testTypeInFocus(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var ref =
+      new AtomicReference<TextField>();
+
+    commander.stageNewAndWait(newStage -> {
+      final var field = new TextField();
+      ref.set(field);
+      newStage.setScene(new Scene(field));
+      field.requestFocus();
+    });
+
+    bot.typeText("ABCDEFGH");
+    assertEquals("ABCDEFGH", ref.get().getText());
+  }
+
+  @Test
+  public void testWaitForStage(
+    final XCRobotType bot,
+    final XCCommanderType commander)
+    throws Exception
+  {
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+        newStage.setScene(new Scene(new TextField()));
+      });
+
+    Platform.runLater(stage::close);
+    bot.waitForStageToClose(stage, 1_000L);
   }
 }

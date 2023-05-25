@@ -19,6 +19,7 @@ package com.io7m.xoanon.extension;
 import com.io7m.xoanon.commander.XCommanders;
 import com.io7m.xoanon.commander.api.XCApplicationInfo;
 import com.io7m.xoanon.commander.api.XCCommanderType;
+import com.io7m.xoanon.commander.api.XCFXThread;
 import com.io7m.xoanon.commander.api.XCKeyMap;
 import com.io7m.xoanon.commander.api.XCRobotType;
 import com.io7m.xoanon.commander.api.XCTestInfo;
@@ -132,7 +133,9 @@ public final class XoExtension
     final TestPlan testPlan)
   {
     try {
-      COMMANDER.close();
+      if (COMMANDER != null) {
+        COMMANDER.close();
+      }
     } catch (final Exception e) {
       LOG.error("close: ", e);
     }
@@ -178,6 +181,10 @@ public final class XoExtension
   public void dynamicTestRegistered(
     final TestIdentifier testIdentifier)
   {
+    if (COMMANDER == null) {
+      return;
+    }
+
     COMMANDER.setTestState(
       new XCTestInfo(
         OffsetDateTime.now(),
@@ -192,16 +199,18 @@ public final class XoExtension
   public void executionStarted(
     final TestIdentifier testIdentifier)
   {
-    if (COMMANDER != null) {
-      COMMANDER.setTestState(
-        new XCTestInfo(
-          OffsetDateTime.now(),
-          testIdentifier.getUniqueId(),
-          testIdentifier.getDisplayName(),
-          XCTestState.RUNNING
-        )
-      );
+    if (COMMANDER == null) {
+      return;
     }
+
+    COMMANDER.setTestState(
+      new XCTestInfo(
+        OffsetDateTime.now(),
+        testIdentifier.getUniqueId(),
+        testIdentifier.getDisplayName(),
+        XCTestState.RUNNING
+      )
+    );
   }
 
   @Override
@@ -209,6 +218,10 @@ public final class XoExtension
     final TestIdentifier testIdentifier,
     final TestExecutionResult testExecutionResult)
   {
+    if (COMMANDER == null) {
+      return;
+    }
+
     COMMANDER.setTestState(
       new XCTestInfo(
         OffsetDateTime.now(),
@@ -272,9 +285,8 @@ public final class XoExtension
      */
 
     try {
-      final var bot =
-        COMMANDER.robot().get(5L, SECONDS);
-      bot.reset();
+      final var bot = COMMANDER.robot().get(5L, SECONDS);
+      bot.reset(Optional.of(COMMANDER.stage()));
     } catch (final Exception e) {
       LOG.error("error resetting input: ", e);
     }
@@ -292,6 +304,10 @@ public final class XoExtension
     final ExtensionContext context,
     final Optional<String> reason)
   {
+    if (COMMANDER == null) {
+      return;
+    }
+
     COMMANDER.setTestState(
       new XCTestInfo(
         OffsetDateTime.now(),
@@ -306,6 +322,10 @@ public final class XoExtension
   public void testSuccessful(
     final ExtensionContext context)
   {
+    if (COMMANDER == null) {
+      return;
+    }
+
     COMMANDER.setTestState(
       new XCTestInfo(
         OffsetDateTime.now(),
@@ -321,6 +341,10 @@ public final class XoExtension
     final ExtensionContext context,
     final Throwable cause)
   {
+    if (COMMANDER == null) {
+      return;
+    }
+
     COMMANDER.setTestState(
       new XCTestInfo(
         OffsetDateTime.now(),
@@ -336,6 +360,10 @@ public final class XoExtension
     final ExtensionContext context,
     final Throwable cause)
   {
+    if (COMMANDER == null) {
+      return;
+    }
+
     COMMANDER.setTestState(
       new XCTestInfo(
         OffsetDateTime.now(),
@@ -349,7 +377,16 @@ public final class XoExtension
   @Override
   public void beforeEach(
     final ExtensionContext context)
+    throws Exception
   {
+    if (COMMANDER == null) {
+      return;
+    }
+
+    XCFXThread.runVWait(1L, SECONDS, () -> {
+      COMMANDER.stage().toBack();
+    });
+
     COMMANDER.setTestState(
       new XCTestInfo(
         OffsetDateTime.now(),

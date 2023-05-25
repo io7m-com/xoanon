@@ -23,45 +23,11 @@ import javafx.stage.Stage;
 import java.util.List;
 
 /**
- * Robot functions related to finding nodes.
+ * Convenient extensions to the robot functions related to finding nodes.
  */
 
-public interface XCRobotFindType
+public interface XCRobotFindType extends XCRobotFindPrimitivesType
 {
-  /**
-   * Find all nodes in the given stage that are of type {@code clazz} (or some subtype of it).
-   *
-   * @param clazz The class
-   * @param stage The stage
-   * @param <T>   The type of descendants
-   *
-   * @return The set of matching descendants
-   *
-   * @throws Exception On errors
-   */
-
-  <T extends Node> List<T> findAllInStage(
-    Class<T> clazz,
-    Stage stage)
-    throws Exception;
-
-  /**
-   * Find all descendants of the given {@code parent} that are of type {@code clazz} (or some subtype of it).
-   *
-   * @param clazz  The class
-   * @param parent The parent
-   * @param <T>    The type of descendants
-   *
-   * @return The set of matching descendants
-   *
-   * @throws Exception On errors
-   */
-
-  <T extends Node> List<T> findAll(
-    Class<T> clazz,
-    Parent parent)
-    throws Exception;
-
   /**
    * Find the node with the given ID by searching through all open stages.
    *
@@ -72,9 +38,12 @@ public interface XCRobotFindType
    * @throws Exception On errors
    */
 
-  Node findWithIdInAnyStage(
-    String id)
-    throws Exception;
+  default Node findWithIdInAnyStage(
+    final String id)
+    throws Exception
+  {
+    return this.findWithIdInAnyStage(Node.class, id);
+  }
 
   /**
    * Find the node with the given ID.
@@ -87,10 +56,32 @@ public interface XCRobotFindType
    * @throws Exception On errors
    */
 
-  Node findWithId(
-    Stage stage,
-    String id)
-    throws Exception;
+  default Node findWithId(
+    final Stage stage,
+    final String id)
+    throws Exception
+  {
+    return this.findWithId(Node.class, stage, id);
+  }
+
+  /**
+   * Find the node with the given ID.
+   *
+   * @param parent The parent within which to search
+   * @param id     The ID
+   *
+   * @return The node
+   *
+   * @throws Exception On errors
+   */
+
+  default Node findWithId(
+    final Parent parent,
+    final String id)
+    throws Exception
+  {
+    return this.findWithId(Node.class, parent, id);
+  }
 
   /**
    * Find the node with the given text content in any open stage.
@@ -102,9 +93,12 @@ public interface XCRobotFindType
    * @throws Exception On errors
    */
 
-  Node findWithTextInAnyStage(
-    String text)
-    throws Exception;
+  default Node findWithTextInAnyStage(
+    final String text)
+    throws Exception
+  {
+    return this.findWithTextInAnyStage(Node.class, text);
+  }
 
   /**
    * Find the node with the given text content.
@@ -117,10 +111,13 @@ public interface XCRobotFindType
    * @throws Exception On errors
    */
 
-  Node findWithText(
-    Stage stage,
-    String text)
-    throws Exception;
+  default Node findWithText(
+    final Stage stage,
+    final String text)
+    throws Exception
+  {
+    return this.findWithText(Node.class, stage, text);
+  }
 
   /**
    * Find the node with the given text content, starting at the given parent
@@ -134,117 +131,70 @@ public interface XCRobotFindType
    * @throws Exception On errors
    */
 
-  Node findWithText(
-    Parent parent,
-    String text)
-    throws Exception;
-
-  /**
-   * Find the node with the given ID by searching through all open stages,
-   * casting it to {@code T}.
-   *
-   * @param <T>   The type of node
-   * @param clazz The class
-   * @param id    The ID
-   *
-   * @return The node
-   *
-   * @throws Exception On errors
-   */
-
-  default <T extends Node> T findWithIdInAnyStage(
-    final Class<T> clazz,
-    final String id)
-    throws Exception
-  {
-    return clazz.cast(this.findWithIdInAnyStage(id));
-  }
-
-  /**
-   * Find the node with the given ID, casting it to {@code T}.
-   *
-   * @param <T>   The type of node
-   * @param clazz The class
-   * @param stage The stage within which to search
-   * @param id    The ID
-   *
-   * @return The node
-   *
-   * @throws Exception On errors
-   */
-
-  default <T extends Node> T findWithId(
-    final Class<T> clazz,
-    final Stage stage,
-    final String id)
-    throws Exception
-  {
-    return clazz.cast(this.findWithId(stage, id));
-  }
-
-  /**
-   * Find the node with the given text content in any open stage, casting
-   * it to {@code T}.
-   *
-   * @param <T>   The type of node
-   * @param clazz The class
-   * @param text  The text
-   *
-   * @return The node
-   *
-   * @throws Exception On errors
-   */
-
-  default <T extends Node> T findWithTextInAnyStage(
-    final Class<T> clazz,
-    final String text)
-    throws Exception
-  {
-    return clazz.cast(this.findWithTextInAnyStage(text));
-  }
-
-  /**
-   * Find the node with the given text content, casting it to {@code T}.
-   *
-   * @param <T>   The type of node
-   * @param clazz The class
-   * @param stage The stage within which to search
-   * @param text  The text
-   *
-   * @return The node
-   *
-   * @throws Exception On errors
-   */
-
-  default <T extends Node> T findWithText(
-    final Class<T> clazz,
-    final Stage stage,
-    final String text)
-    throws Exception
-  {
-    return clazz.cast(this.findWithText(stage, text));
-  }
-
-  /**
-   * Find the node with the given text content, starting at the given parent
-   * node.
-   *
-   * @param <T>    The type of node
-   * @param clazz  The class
-   * @param parent The parent
-   * @param text   The text
-   *
-   * @return The node
-   *
-   * @throws Exception On errors
-   */
-
-  default <T extends Node> T findWithText(
-    final Class<T> clazz,
+  default Node findWithText(
     final Parent parent,
     final String text)
     throws Exception
   {
-    return clazz.cast(this.findWithText(parent, text));
+    return this.findWithText(Node.class, parent, text);
+  }
+
+  /**
+   * Find all nodes in the given stage that have the given CSS class.
+   *
+   * @param stage    The stage
+   * @param cssClass The CSS class
+   *
+   * @return The set of matching descendants
+   *
+   * @throws Exception On errors
+   */
+
+  default List<Node> findAllWithClassInStage(
+    final Stage stage,
+    final String cssClass)
+    throws Exception
+  {
+    return this.findAllWithClassInStage(Node.class, stage, cssClass);
+  }
+
+  /**
+   * Find all descendants of the given {@code parent} that have the
+   * given CSS class.
+   *
+   * @param parent   The parent
+   * @param cssClass The CSS class
+   *
+   * @return The set of matching descendants
+   *
+   * @throws Exception On errors
+   */
+
+  default List<Node> findAllWithClass(
+    final Parent parent,
+    final String cssClass)
+    throws Exception
+  {
+    return this.findAllWithClass(Node.class, parent, cssClass);
+  }
+
+  /**
+   * Find all descendants of the given {@code parent} that have the
+   * given CSS class.
+   *
+   * @param parent   The parent
+   * @param cssClass The CSS class
+   *
+   * @return The set of matching descendants
+   *
+   * @throws Exception On errors
+   */
+
+  default List<Node> findAllWithClassInAnyStage(
+    final Parent parent,
+    final String cssClass)
+    throws Exception
+  {
+    return this.findAllWithClassInAnyStage(Node.class, cssClass);
   }
 }

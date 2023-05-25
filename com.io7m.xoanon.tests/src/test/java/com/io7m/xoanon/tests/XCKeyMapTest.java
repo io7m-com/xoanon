@@ -14,27 +14,24 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/**
- * JUnit 5 JavaFX test harness (Commander implementation)
- */
 
-open module com.io7m.xoanon.commander
+package com.io7m.xoanon.tests;
+
+import com.io7m.xoanon.commander.api.XCKeyMap;
+import net.jqwik.api.ForAll;
+import net.jqwik.api.Property;
+import org.junit.jupiter.api.Assertions;
+
+import java.util.List;
+
+public final class XCKeyMapTest
 {
-  requires static org.osgi.annotation.versioning;
-  requires static org.osgi.annotation.bundle;
-
-  requires transitive com.io7m.xoanon.commander.api;
-
-  requires com.io7m.jxtrand.vanilla;
-
-  requires javafx.base;
-  requires javafx.controls;
-  requires javafx.fxml;
-  requires javafx.graphics;
-  requires org.slf4j;
-
-  exports com.io7m.xoanon.commander;
-
-  exports com.io7m.xoanon.commander.internal
-    to com.io7m.xoanon.tests;
+  @Property
+  public void testEmpty(
+    final @ForAll Character ch)
+  {
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      XCKeyMap.empty().toCodes(List.of(ch));
+    });
+  }
 }

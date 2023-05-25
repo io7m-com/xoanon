@@ -17,10 +17,6 @@
 package com.io7m.xoanon.commander.api;
 
 import javafx.scene.robot.Robot;
-import javafx.stage.Stage;
-
-import java.util.concurrent.TimeoutException;
-import java.util.function.BooleanSupplier;
 
 /**
  * A robot that can send events to JavaFX nodes. All methods submit work to the
@@ -30,7 +26,7 @@ import java.util.function.BooleanSupplier;
 
 public interface XCRobotType
   extends XCRobotFindType,
-  XCRobotInteractionsType
+  XCRobotInteractionsType, XCRobotConfigurationType, XCRobotWaitingType
 {
   /**
    * Execute {@code f} on the UI thread, and wait for it to complete
@@ -62,82 +58,8 @@ public interface XCRobotType
     throws Exception;
 
   /**
-   * Disable slow motion mode.
-   */
-
-  void slowMotionDisable();
-
-  /**
-   * Enable slow motion mode. This causes the robot to insert long pauses
-   * between operations in order to assist with debugging failing tests.
-   */
-
-  void slowMotionEnable();
-
-  /**
-   * @return The current timeout value in milliseconds
-   */
-
-  long timeoutMilliseconds();
-
-  /**
-   * Set the current timeout value in milliseconds.
-   *
-   * @param ms The number of milliseconds
-   */
-
-  void setTimeoutMilliseconds(long ms);
-
-  /**
-   * Wait for the default stage to close.
-   *
-   * @param stage        The stage
-   * @param milliseconds The time to wait in milliseconds
-   *
-   * @throws Exception On errors
-   */
-
-  void waitForStageToClose(
-    Stage stage,
-    long milliseconds)
-    throws Exception;
-
-  /**
-   * @return The underlying JavaFX roboto
+   * @return The underlying JavaFX robot
    */
 
   Robot robot();
-
-  /**
-   * Do nothing for the given number of JavaFX frames.
-   *
-   * @param frames The frames
-   *
-   * @throws Exception On errors
-   */
-
-  void sleepForFrames(int frames)
-    throws Exception;
-
-  /**
-   * Wait until the given predicate is true. The predicate is evaluated
-   * repeatedly on the JavaFX UI thread.
-   *
-   * @param ms        The maximum number of milliseconds to wait
-   * @param predicate The predicate to evaluate
-   *
-   * @throws TimeoutException If the predicate does not return {@code true}
-   *                          before {@code ms} milliseconds have elapsed.
-   * @throws Exception        On errors
-   */
-
-  void waitUntil(
-    long ms,
-    BooleanSupplier predicate)
-    throws TimeoutException, Exception;
-
-  /**
-   * Release all keys, and all mouse buttons.
-   */
-  void reset();
 }

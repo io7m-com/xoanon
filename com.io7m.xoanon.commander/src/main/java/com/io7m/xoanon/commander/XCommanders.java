@@ -44,6 +44,7 @@ public final class XCommanders
   public static CompletableFuture<XCCommanderType> boot()
   {
     final var future = new CompletableFuture<XCCommanderType>();
+    Platform.setImplicitExit(false);
     Platform.startup(() -> {
       try {
         future.complete(XBApplication.boot());
