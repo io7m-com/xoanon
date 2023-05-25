@@ -15,19 +15,26 @@
  */
 
 /**
- * JUnit 5 JavaFX extension (Test suite)
+ * JUnit 5 JavaFX test harness (Commander implementation)
  */
 
-open module com.io7m.xoanon.tests
+open module com.io7m.xoanon.commander
 {
-  requires transitive com.io7m.xoanon.extension;
+  requires static org.osgi.annotation.versioning;
+  requires static org.osgi.annotation.bundle;
 
-  requires com.io7m.percentpass.extension;
+  requires transitive com.io7m.xoanon.commander.api;
+
+  requires com.io7m.jxtrand.vanilla;
+
   requires javafx.base;
   requires javafx.controls;
-  requires org.junit.jupiter.api;
-  requires org.junit.jupiter.engine;
+  requires javafx.fxml;
+  requires javafx.graphics;
   requires org.slf4j;
 
-  exports com.io7m.xoanon.tests;
+  exports com.io7m.xoanon.commander;
+
+  exports com.io7m.xoanon.commander.internal
+    to com.io7m.xoanon.tests;
 }

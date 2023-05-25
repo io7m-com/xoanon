@@ -16,13 +16,12 @@
 
 package com.io7m.xoanon.tests;
 
-import com.io7m.percentpass.extension.PercentPassing;
-import com.io7m.xoanon.extension.XoBots;
+import com.io7m.xoanon.commander.api.XCCommanderType;
+import com.io7m.xoanon.commander.api.XCRobotType;
 import com.io7m.xoanon.extension.XoExtension;
-import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.stage.Stage;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,28 +36,28 @@ public final class XoExtensionOtherTest
   private static final Logger LOG =
     LoggerFactory.getLogger(XoExtensionOtherTest.class);
 
-  @PercentPassing(executionCount = 6, passPercent = 50.0)
+  @Test
   public void testButton(
-    final Stage stage)
+    final XCRobotType bot,
+    final XCCommanderType commander)
     throws Exception
   {
-    final var bot =
-      XoBots.createForStage(stage);
+    final var clicked =
+      new AtomicBoolean(false);
 
-    final var clicked = new AtomicBoolean(false);
-    Platform.runLater(() -> {
-      final var button = new Button();
-      button.setId("x");
-      button.setOnMouseClicked(event -> {
-        LOG.debug("click!");
-        clicked.set(true);
+    final var stage =
+      commander.stageNewAndWait(newStage -> {
+        final var button = new Button();
+        button.setId("x");
+        button.setOnMouseClicked(event -> {
+          LOG.debug("click!");
+          clicked.set(true);
+        });
+        newStage.setScene(new Scene(button));
       });
-      stage.setScene(new Scene(button));
-    });
 
-    final var node = bot.findWithId("x");
+    final var node = bot.findWithId(stage, "x");
     bot.click(node);
-    bot.sleepForFrames(60);
 
     assertTrue(clicked.get());
   }

@@ -14,20 +14,25 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
+package com.io7m.xoanon.commander.api;
+
 /**
- * JUnit 5 JavaFX extension (Test suite)
+ * An operation performed on the FX thread.
+ *
+ * @param <T> The type of returned values
  */
 
-open module com.io7m.xoanon.tests
+public interface XCFXThreadOperationType<T>
 {
-  requires transitive com.io7m.xoanon.extension;
+  /**
+   * Execute the operation.
+   *
+   * @return A value of {@code T}
+   *
+   * @throws Exception On errors
+   */
 
-  requires com.io7m.percentpass.extension;
-  requires javafx.base;
-  requires javafx.controls;
-  requires org.junit.jupiter.api;
-  requires org.junit.jupiter.engine;
-  requires org.slf4j;
-
-  exports com.io7m.xoanon.tests;
+  T execute()
+    throws Exception;
 }

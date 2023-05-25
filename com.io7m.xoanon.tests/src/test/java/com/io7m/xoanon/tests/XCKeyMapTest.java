@@ -14,11 +14,24 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/**
- * JUnit 5 JavaFX extension (Extension)
- */
 
-@Version("1.0.0")
-package com.io7m.xoanon.extension.internal;
+package com.io7m.xoanon.tests;
 
-import org.osgi.annotation.versioning.Version;
+import com.io7m.xoanon.commander.api.XCKeyMap;
+import net.jqwik.api.ForAll;
+import net.jqwik.api.Property;
+import org.junit.jupiter.api.Assertions;
+
+import java.util.List;
+
+public final class XCKeyMapTest
+{
+  @Property
+  public void testEmpty(
+    final @ForAll Character ch)
+  {
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      XCKeyMap.empty().toCodes(List.of(ch));
+    });
+  }
+}

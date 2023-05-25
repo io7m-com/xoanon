@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<HBox alignment="CENTER_LEFT" prefHeight="16.0" prefWidth="128.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.io7m.xoanon.commander.internal.XBTestCellController">
+   <children>
+      <Rectangle fx:id="status" fill="#5ffa9f" height="16.0" stroke="#000000"
+                 strokeType="INSIDE" width="16.0" />
+      <Region maxWidth="-Infinity" minWidth="-Infinity" prefWidth="8.0" />
+      <Label fx:id="name" text="Label">
+         <font>
+            <Font name="Monospaced Regular" size="11.0" />
+         </font></Label>
+   </children>
+</HBox>

@@ -20,10 +20,8 @@ package com.io7m.xoanon.tests;
  * Nothing.
  */
 
-public final class Empty
-{
-  private Empty()
-  {
+public final class Empty {
+    private Empty() {
 
-  }
+    }
 }

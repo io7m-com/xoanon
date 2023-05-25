@@ -1,0 +1,216 @@
+.root
+{
+  -fx-font-size: 10pt;
+  -fx-font-family: "Monospaced";
+
+  -fx-base:              #000000;
+  -fx-accent:            #ffffff;
+  -fx-default-button:    #ffffff;
+  -fx-focus-color:       #ffffff;
+  -fx-faint-focus-color: #ffffff22;
+}
+
+.progress-bar
+{
+  -fx-indeterminate-bar-length: 16;
+}
+
+.progress-bar > .track
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-border-color:             #ffffff;
+  -fx-control-inner-background: #000000;
+}
+
+.progress-bar > .bar
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-background-color: #ffffff;
+}
+
+.scroll-bar > .thumb
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-border-color:     #606060;
+  -fx-background-color: #303030;
+}
+
+.scroll-bar:hover > .thumb,
+.scroll-bar:pressed > .thumb
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-border-color:     #606060;
+  -fx-background-color: #505050;
+}
+
+.scroll-bar > .track
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-border-color:     #606060;
+  -fx-background-color: #202020;
+}
+
+.scroll-bar > .decrement-button
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-border-color: #606060;
+}
+
+.scroll-bar > .increment-button
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-border-color: #606060;
+}
+
+.scroll-bar > .increment-button > .increment-arrow,
+.scroll-bar > .decrement-button > .decrement-arrow
+{
+  -fx-background-color: #ffffff;
+}
+
+.menu-bar
+{
+  -fx-background-color: #202020;
+  -fx-border-color:     #303030;
+}
+
+.button,
+.check-box,
+.choice-box,
+.color-picker,
+.color-picker.split-button,
+.combo-box-base,
+.container,
+.control-buttons-tab,
+.menu-button,
+.progress-bar,
+.radio-button,
+.text-field,
+.text-area,
+.tab,
+.tab-down-button,
+.tab-header-area,
+.tab-pane,
+.toggle-button
+{
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-radius: 0 0 0 0;
+}
+
+.tabButton {
+  -fx-font-size: 8pt;
+}
+
+.errorHighlight
+{
+  -fx-background-color: #ffbbbb;
+}
+
+.noHeader .column-header-background
+{
+  -fx-max-height: 0;
+  -fx-pref-height: 0;
+  -fx-min-height: 0;
+}
+
+.statusBar
+{
+  -fx-background-color: #202020;
+  -fx-border-color:     #303030;
+}
+
+#statusConnectionText
+{
+  -fx-font-size:   8pt;
+  -fx-font-family: "Monospaced";
+}
+
+.presetHeaderText
+{
+  -fx-font-size:   10pt;
+  -fx-font-weight: bold;
+  -fx-font-family: "Monospaced";
+}
+
+.preferencesHeaderText
+{
+  -fx-font-size:   12pt;
+  -fx-font-weight: bold;
+  -fx-font-family: "Monospaced";
+}
+
+.textShadow
+{
+  -fx-text-fill: #000000;
+}
+
+.text-field,
+.text-area
+{
+  -fx-background-color: #202020;
+  -fx-text-fill:        #ffffff;
+
+  -fx-border-color: #ffffff;
+  -fx-border-width: 1;
+  -fx-border-radius: 0;
+}
+
+.list-view
+{
+  -fx-background-color: #202020;
+  -fx-border-color: #ffffff;
+  -fx-border-width: 1;
+  -fx-border-radius: 0;
+}
+
+.list-cell
+{
+  -fx-background-color: #202020;
+  -fx-text-fill:        #ffffff;
+  -fx-border-width: 1;
+  -fx-border-radius: 0;
+}
+
+.list-cell .label
+{
+  -fx-text-fill: #ffffff;
+}
+
+.text-area .content
+{
+  -fx-background-color: #202020;
+}
+
+.windowListCell .label
+{
+  -fx-font-size:   11pt;
+  -fx-font-family: "Monospaced";
+}

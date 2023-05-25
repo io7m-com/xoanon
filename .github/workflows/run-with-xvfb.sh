@@ -10,12 +10,11 @@ exec > >(tee build.txt) 2>&1
 #   fluxbox to provide a bare-minimum window manager with click-to-focus
 #   ffmpeg  to record the session
 #   feh     to set a background
-#   xterm   to display the build log in the video
 #
 
 sudo apt-get -y update
 sudo apt-get -y upgrade
-sudo apt-get -y install xvfb fluxbox feh ffmpeg xterm
+sudo apt-get -y install xvfb fluxbox feh ffmpeg
 
 #---------------------------------------------------------------------
 # Start Xvfb on a new display.
@@ -26,17 +25,17 @@ export DISPLAY=:99
 sleep 1
 
 #---------------------------------------------------------------------
+# Start recording the session.
+#
+
+ffmpeg -f x11grab -y -r 60 -video_size 1280x1024 -i :99 -vcodec libx264 test-suite.webm &
+FFMPEG_PID="$!"
+
+#---------------------------------------------------------------------
 # Start fluxbox on the X server.
 #
 
 fluxbox &
-sleep 1
-
-#---------------------------------------------------------------------
-# Start an xterm that displays the build log.
-#
-
-xterm -geometry 200x40 -e tail -F build.txt &
 sleep 1
 
 #---------------------------------------------------------------------
@@ -45,13 +44,6 @@ sleep 1
 
 feh --bg-tile .github/workflows/wallpaper.jpg
 sleep 1
-
-#---------------------------------------------------------------------
-# Start recording the session.
-#
-
-ffmpeg -f x11grab -y -r 15 -video_size 1280x1024 -i :99 -vcodec libx264 test-suite.mkv &
-FFMPEG_PID="$!"
 
 #---------------------------------------------------------------------
 # Execute the passed-in build command.
@@ -65,5 +57,5 @@ FFMPEG_PID="$!"
 # stops.
 #
 
-sleep 5
+sleep 20
 kill -INT "${FFMPEG_PID}"

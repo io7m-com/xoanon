@@ -9,7 +9,7 @@
   <parent>
     <artifactId>com.io7m.xoanon</artifactId>
     <groupId>com.io7m.xoanon</groupId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
   </parent>
 
   <artifactId>com.io7m.xoanon.tests</artifactId>
@@ -61,6 +61,14 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.jqwik</groupId>
+      <artifactId>jqwik-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.jqwik</groupId>
+      <artifactId>jqwik-engine</artifactId>
     </dependency>
   </dependencies>
 

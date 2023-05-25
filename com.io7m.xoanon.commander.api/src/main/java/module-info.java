@@ -14,41 +14,17 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
-package com.io7m.xoanon.extension;
-
-import com.io7m.xoanon.extension.internal.XoBot;
-import javafx.stage.Stage;
-
-import java.util.concurrent.TimeUnit;
-
 /**
- * Functions to create robots.
+ * JUnit 5 JavaFX test harness (Commaner API)
  */
 
-public final class XoBots
+module com.io7m.xoanon.commander.api
 {
-  private XoBots()
-  {
+  requires static org.osgi.annotation.bundle;
+  requires static org.osgi.annotation.versioning;
 
-  }
+  requires javafx.graphics;
+  requires org.slf4j;
 
-  /**
-   * Create a new robot for the given stage.
-   *
-   * @param stage The stage
-   *
-   * @return A new robot
-   *
-   * @throws Exception On errors
-   */
-
-  public static XoBotType createForStage(
-    final Stage stage)
-    throws Exception
-  {
-    return XoFXThread.run(() -> {
-      return new XoBot(stage);
-    }).get(1L, TimeUnit.SECONDS);
-  }
+  exports com.io7m.xoanon.commander.api;
 }
