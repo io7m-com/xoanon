@@ -13,7 +13,7 @@
 
   <groupId>com.io7m.xoanon</groupId>
   <artifactId>com.io7m.xoanon</artifactId>
-  <version>0.0.3</version>
+  <version>0.0.4-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>com.io7m.xoanon</name>
