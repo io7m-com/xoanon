@@ -58,4 +58,4 @@ sleep 1
 #
 
 sleep 20
-kill -INT "${FFMPEG_PID}"
+kill -INT "${FFMPEG_PID}" || true
