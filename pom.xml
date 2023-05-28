@@ -13,7 +13,7 @@
 
   <groupId>com.io7m.xoanon</groupId>
   <artifactId>com.io7m.xoanon</artifactId>
-  <version>0.0.3</version>
+  <version>1.0.0-beta0001</version>
 
   <packaging>pom</packaging>
   <name>com.io7m.xoanon</name>
@@ -29,7 +29,7 @@
   </modules>
 
   <properties>
-    <io7m.api.previousVersion>0.0.3</io7m.api.previousVersion>
+    <io7m.api.previousVersion>1.0.0-beta0001</io7m.api.previousVersion>
     <org.javafx.version>20.0.1</org.javafx.version>
 
     <!-- Note: JUnit and JUnit platform versions are strongly coupled. -->
