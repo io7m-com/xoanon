@@ -14,14 +14,25 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.xoanon.tests;
-
 /**
- * Nothing.
+ * JUnit 5 JavaFX extension (Test suite)
  */
 
-public final class Empty {
-    private Empty() {
+open module com.io7m.xoanon.tests
+{
+  requires org.junit.jupiter.api;
+  requires org.junit.jupiter.engine;
+  requires org.junit.platform.commons;
+  requires org.junit.platform.engine;
 
-    }
+  requires com.io7m.xoanon.commander.api;
+  requires com.io7m.xoanon.commander;
+  requires com.io7m.xoanon.extension;
+
+  requires com.io7m.percentpass.extension;
+  requires javafx.graphics;
+  requires net.jqwik.api;
+  requires org.slf4j;
+
+  exports com.io7m.xoanon.tests;
 }

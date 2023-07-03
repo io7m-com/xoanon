@@ -19,7 +19,6 @@ package com.io7m.xoanon.tests;
 
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.time.Duration;
 import java.time.Instant;
