@@ -36,7 +36,7 @@
     <!-- Note: JUnit and JUnit platform versions are strongly coupled. -->
     <junit.version>5.10.2</junit.version>
     <junit-platform.version>1.10.2</junit-platform.version>
-    <jqwik.version>1.8.2</jqwik.version>
+    <jqwik.version>1.8.4</jqwik.version>
   </properties>
 
   <licenses>
