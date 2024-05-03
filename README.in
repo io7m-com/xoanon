@@ -334,7 +334,7 @@ due to tiny differences in thread scheduling and other sources of
 nondeterministic latency.
 
 Most UI tests should use, for example, the `@MinimumPassing` annotation from
-the [percentpass](https://github.com/io7m/percentpass) package. This allows
+the [percentpass](https://www.github.com/io7m-com/percentpass) package. This allows
 for running a specified test repeatedly and then passing if a given minimum
 number of test runs succeeded:
 
