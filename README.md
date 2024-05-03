@@ -26,7 +26,7 @@ tests for [JavaFX](https://openjfx.io/) applications and libraries.
   * Designed for use in continuous integration.
   * Automatic keyboard map generation for system-independent test execution.
   * Slow motion mode for assistance with debugging failing tests.
-  * Written in pure Java 17.
+  * Written in pure Java 21.
   * [OSGi](https://www.osgi.org/) ready.
   * [JPMS](https://en.wikipedia.org/wiki/Java_Platform_Module_System) ready.
   * ISC license.

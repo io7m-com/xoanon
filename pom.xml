@@ -31,6 +31,7 @@
   <properties>
     <io7m.api.previousVersion>1.0.0-SNAPSHOT</io7m.api.previousVersion>
     <io7m.java.targetJavaVersion>21</io7m.java.targetJavaVersion>
+
     <org.javafx.version>21.0.3</org.javafx.version>
 
     <!-- Note: JUnit and JUnit platform versions are strongly coupled. -->
