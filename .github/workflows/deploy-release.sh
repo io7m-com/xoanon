@@ -1,4 +1,9 @@
 #!/bin/sh
+#
+#  Automatically generated: DO NOT EDIT.
+#
+#  Generation code: https://www.github.com/io7m-com/.github/
+#
 
 fatal()
 {

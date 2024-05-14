@@ -1,4 +1,9 @@
 #!/bin/bash -ex
+#
+#  Automatically generated: DO NOT EDIT.
+#
+#  Generation code: https://www.github.com/io7m-com/.github/
+#
 
 exec > >(tee build.txt) 2>&1
 
