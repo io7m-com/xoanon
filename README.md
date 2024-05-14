@@ -2,17 +2,18 @@ xoanon
 ===
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.io7m.xoanon/com.io7m.xoanon.svg?style=flat-square)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.io7m.xoanon%22)
-[![Maven Central (snapshot)](https://img.shields.io/nexus/s/https/s01.oss.sonatype.org/com.io7m.xoanon/com.io7m.xoanon.svg?style=flat-square)](https://s01.oss.sonatype.org/content/repositories/snapshots/com/io7m/xoanon/)
-[![Codecov](https://img.shields.io/codecov/c/github/io7m/xoanon.svg?style=flat-square)](https://codecov.io/gh/io7m/xoanon)
+[![Maven Central (snapshot)](https://img.shields.io/nexus/s/com.io7m.xoanon/com.io7m.xoanon?server=https%3A%2F%2Fs01.oss.sonatype.org&style=flat-square)](https://s01.oss.sonatype.org/content/repositories/snapshots/com/io7m/xoanon/)
+[![Codecov](https://img.shields.io/codecov/c/github/io7m-com/xoanon.svg?style=flat-square)](https://codecov.io/gh/io7m-com/xoanon)
+![Java Version](https://img.shields.io/badge/21-java?label=java&color=e6c35c)
 
-![xoanon](./src/site/resources/xoanon.jpg?raw=true)
+![com.io7m.xoanon](./src/site/resources/xoanon.jpg?raw=true)
 
 | JVM | Platform | Status |
 |-----|----------|--------|
-| OpenJDK (Temurin) Current | Linux | [![Build (OpenJDK (Temurin) Current, Linux)](https://img.shields.io/github/actions/workflow/status/io7m/xoanon/main.linux.temurin.current.yml)](https://github.com/io7m/xoanon/actions?query=workflow%3Amain.linux.temurin.current)|
-| OpenJDK (Temurin) LTS | Linux | [![Build (OpenJDK (Temurin) LTS, Linux)](https://img.shields.io/github/actions/workflow/status/io7m/xoanon/main.linux.temurin.lts.yml)](https://github.com/io7m/xoanon/actions?query=workflow%3Amain.linux.temurin.lts)|
-| OpenJDK (Temurin) Current | Windows | [![Build (OpenJDK (Temurin) Current, Windows)](https://img.shields.io/github/actions/workflow/status/io7m/xoanon/main.windows.temurin.current.yml)](https://github.com/io7m/xoanon/actions?query=workflow%3Amain.windows.temurin.current)|
-| OpenJDK (Temurin) LTS | Windows | [![Build (OpenJDK (Temurin) LTS, Windows)](https://img.shields.io/github/actions/workflow/status/io7m/xoanon/main.windows.temurin.lts.yml)](https://github.com/io7m/xoanon/actions?query=workflow%3Amain.windows.temurin.lts)|
+| OpenJDK (Temurin) Current | Linux | [![Build (OpenJDK (Temurin) Current, Linux)](https://img.shields.io/github/actions/workflow/status/io7m-com/xoanon/main.linux.temurin.current.yml)](https://www.github.com/io7m-com/xoanon/actions?query=workflow%3Amain.linux.temurin.current)|
+| OpenJDK (Temurin) LTS | Linux | [![Build (OpenJDK (Temurin) LTS, Linux)](https://img.shields.io/github/actions/workflow/status/io7m-com/xoanon/main.linux.temurin.lts.yml)](https://www.github.com/io7m-com/xoanon/actions?query=workflow%3Amain.linux.temurin.lts)|
+| OpenJDK (Temurin) Current | Windows | [![Build (OpenJDK (Temurin) Current, Windows)](https://img.shields.io/github/actions/workflow/status/io7m-com/xoanon/main.windows.temurin.current.yml)](https://www.github.com/io7m-com/xoanon/actions?query=workflow%3Amain.windows.temurin.current)|
+| OpenJDK (Temurin) LTS | Windows | [![Build (OpenJDK (Temurin) LTS, Windows)](https://img.shields.io/github/actions/workflow/status/io7m-com/xoanon/main.windows.temurin.lts.yml)](https://www.github.com/io7m-com/xoanon/actions?query=workflow%3Amain.windows.temurin.lts)|
 
 ## xoanon
 
@@ -26,7 +27,7 @@ tests for [JavaFX](https://openjfx.io/) applications and libraries.
   * Designed for use in continuous integration.
   * Automatic keyboard map generation for system-independent test execution.
   * Slow motion mode for assistance with debugging failing tests.
-  * Written in pure Java 17.
+  * Written in pure Java 21.
   * [OSGi](https://www.osgi.org/) ready.
   * [JPMS](https://en.wikipedia.org/wiki/Java_Platform_Module_System) ready.
   * ISC license.
@@ -349,7 +350,7 @@ due to tiny differences in thread scheduling and other sources of
 nondeterministic latency.
 
 Most UI tests should use, for example, the `@MinimumPassing` annotation from
-the [percentpass](https://github.com/io7m/percentpass) package. This allows
+the [percentpass](https://www.github.com/io7m-com/percentpass) package. This allows
 for running a specified test repeatedly and then passing if a given minimum
 number of test runs succeeded:
 

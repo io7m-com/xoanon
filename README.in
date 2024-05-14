@@ -11,7 +11,7 @@ tests for [JavaFX](https://openjfx.io/) applications and libraries.
   * Designed for use in continuous integration.
   * Automatic keyboard map generation for system-independent test execution.
   * Slow motion mode for assistance with debugging failing tests.
-  * Written in pure Java 17.
+  * Written in pure Java 21.
   * [OSGi](https://www.osgi.org/) ready.
   * [JPMS](https://en.wikipedia.org/wiki/Java_Platform_Module_System) ready.
   * ISC license.
@@ -334,7 +334,7 @@ due to tiny differences in thread scheduling and other sources of
 nondeterministic latency.
 
 Most UI tests should use, for example, the `@MinimumPassing` annotation from
-the [percentpass](https://github.com/io7m/percentpass) package. This allows
+the [percentpass](https://www.github.com/io7m-com/percentpass) package. This allows
 for running a specified test repeatedly and then passing if a given minimum
 number of test runs succeeded:
 

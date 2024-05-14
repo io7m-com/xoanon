@@ -1,6 +1,6 @@
 <div xmlns="http://www.w3.org/1999/xhtml">
     <p class="shields">
-        <a href="https://github.com/io7m/xoanon/actions?query=workflow%3Amain.linux.temurin.lts">
+        <a href="https://www.github.com/io7m-com/xoanon/actions?query=workflow%3Amain.linux.temurin.lts">
             <img src="https://img.shields.io/github/actions/workflow/status/io7m/xoanon/main.linux.temurin.lts.yml"
                  alt="Build status"/>
         </a>

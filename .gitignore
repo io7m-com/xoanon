@@ -10,3 +10,6 @@ target
 .lia.cache
 .nra.cache
 .nia.cache
+.jqwik-database
+dependency-reduced-pom.xml
+pom.xml.versionsBackup
