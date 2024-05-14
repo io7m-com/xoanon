@@ -42,7 +42,7 @@ sleep 1
 # Set a desktop image.
 #
 
-feh --bg-tile .github/workflows/wallpaper.jpg
+feh --bg-tile .github/workflows/wallpaper.png
 sleep 1
 
 #---------------------------------------------------------------------
