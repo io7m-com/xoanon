@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <c:changelog project="com.io7m.xoanon" xmlns:c="urn:com.io7m.changelog:4.0">
   <c:releases>
-    <c:release date="2024-05-14T20:53:17+00:00" is-open="false" ticket-system="com.github.io7m.xoanon" version="1.0.0">
+    <c:release date="2024-05-14T00:00:00+00:00" is-open="false" ticket-system="com.github.io7m.xoanon" version="1.0.0">
       <c:changes>
         <c:change date="2024-05-14T00:00:00+00:00" summary="Initial public release."/>
+      </c:changes>
+    </c:release>
+    <c:release date="2024-05-15T19:18:48+00:00" is-open="true" ticket-system="com.github.io7m.xoanon" version="1.0.1">
+      <c:changes>
+        <c:change date="2024-05-15T19:18:48+00:00" summary="Make JavaFX dependencies &quot;optional&quot; so that they are not exported to the application under test.">
+          <c:tickets>
+            <c:ticket id="15"/>
+          </c:tickets>
+        </c:change>
       </c:changes>
     </c:release>
   </c:releases>
