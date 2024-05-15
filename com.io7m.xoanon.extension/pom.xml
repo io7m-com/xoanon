@@ -9,7 +9,7 @@
   <parent>
     <artifactId>com.io7m.xoanon</artifactId>
     <groupId>com.io7m.xoanon</groupId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
   </parent>
 
   <artifactId>com.io7m.xoanon.extension</artifactId>
@@ -46,15 +46,19 @@
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-base</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-graphics</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-controls</artifactId>
+      <optional>true</optional>
     </dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>

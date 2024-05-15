@@ -9,7 +9,7 @@
   <parent>
     <artifactId>com.io7m.xoanon</artifactId>
     <groupId>com.io7m.xoanon</groupId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
   </parent>
 
   <artifactId>com.io7m.xoanon.demo</artifactId>
@@ -46,6 +46,7 @@
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-controls</artifactId>
     </dependency>
+
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
