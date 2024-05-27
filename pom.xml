@@ -34,7 +34,7 @@
     <io7m.java.targetJavaVersion>17</io7m.java.targetJavaVersion>
 
     <!-- Third-party dependencies. -->
-    <jqwik.version>1.8.4</jqwik.version>
+    <jqwik.version>1.8.5</jqwik.version>
     <junit.version>5.10.2</junit.version>
     <org.javafx.version>21.0.3</org.javafx.version>
   </properties>
