@@ -3,5 +3,25 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 
 <properties>
+  <entry key="displaySafetyError"><![CDATA[
+Running tests on the current display is not permitted.
 
+Test suites can take over the keyboard, mouse, and display for long
+periods. It is recommended that tests be executed in software-defined
+nested display.
+
+  See: https://www.x.org/archive/X11R7.5/doc/man/man1/Xnest.1.html
+  See: https://freedesktop.org/wiki/Software/Xephyr/
+  See: https://github.com/io7m-com/xoanon/issues/19
+
+On X11 platforms, specifying an alternative existing display using
+the DISPLAY environment variable can work:
+
+  DISPLAY=:1
+
+If you really want to run tests on this display, define the following
+environment variable:
+
+  XOANON_REALLY_USE_LOCAL_DISPLAY=true
+]]></entry>
 </properties>
