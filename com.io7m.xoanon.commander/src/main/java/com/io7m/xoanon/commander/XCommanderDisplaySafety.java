@@ -56,6 +56,11 @@ public final class XCommanderDisplaySafety
   public static boolean isDisplayPermitted(
     final Map<String, String> environment)
   {
+    if (isDisplayPermittedOverride(environment)) {
+      LOG.debug("Running on the local display has been explicitly permitted.");
+      return true;
+    }
+
     final var display =
       environment.get("DISPLAY");
 
@@ -83,7 +88,7 @@ public final class XCommanderDisplaySafety
     return switch (hostname) {
       case "localhost", "" -> {
         LOG.debug("Display appears to be local.");
-        yield isDisplayPermittedOverride(environment);
+        yield false;
       }
       default -> {
         LOG.debug("Non-localhost hostname.");

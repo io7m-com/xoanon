@@ -18,6 +18,7 @@ package com.io7m.xoanon.tests;
 
 import com.io7m.xoanon.commander.XCommanderDisplaySafety;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import java.util.Map;
@@ -137,5 +138,15 @@ public final class XCommanderDisplaySafetyTest
           System.out.println(ex.getMessage());
         });
       });
+  }
+
+  @Test
+  public void testCheckLocalUndefinedOverride()
+  {
+    XCommanderDisplaySafety.checkDisplayPermitted(
+      Map.ofEntries(
+        Map.entry("XOANON_REALLY_USE_LOCAL_DISPLAY", "true")
+      )
+    );
   }
 }
