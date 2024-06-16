@@ -40,6 +40,8 @@ public final class ExampleTest
 }
 ```
 
+See the notes on [display safety](#display-safety).
+
 #### Commander
 
 The _commander_ is the main service used in the `xoanon` package. It is
@@ -356,6 +358,43 @@ day to execute.
 
 Experience has shown that running well-written tests five times and failing
 if less than four of those runs succeeded appears to be a good balance.
+
+#### Display Safety
+
+The `xoanon` package, by design, effectively takes over the display, keyboard,
+and mouse during test suite runs. If a user is running a test suite that uses
+`xoanon` and isn't expecting this, the results can be slightly catastrophic.
+Not only does `xoanon` take over the display, but it also makes it very
+difficult to stop the test suite once it has started.
+
+As a safety measure, `xoanon` will try to detect if it is running on a "local"
+display and refuse to run if it thinks that it is. This is currently only
+reliably detected on [X11](https://www.x.org/wiki/). When trying to run on a
+display that `xoanon` considers to be "local", an error message similar to
+the following will appear:
+
+```
+Running tests on the current display is not permitted.
+
+Test suites can take over the keyboard, mouse, and display for long periods.
+It is recommended that tests be executed in software-defined nested display.
+
+  See: https://www.x.org/archive/X11R7.5/doc/man/man1/Xnest.1.html
+  See: https://freedesktop.org/wiki/Software/Xephyr/
+  See: https://github.com/io7m-com/xoanon/issues/19
+
+If you really want to run tests on this display, define the following environment variable:
+
+  XOANON_REALLY_USE_LOCAL_DISPLAY=true
+```
+
+As mentioned, if the local display should be used, the
+`XOANON_REALLY_USE_LOCAL_DISPLAY` environment variable should be set to `true`
+before running the test suite.
+
+Ideally, test suites should be run inside of
+[Xnest](https://www.x.org/archive/X11R7.5/doc/man/man1/Xnest.1.html)
+or [Xephyr](https://freedesktop.org/wiki/Software/Xephyr/).
 
 #### Video Capture
 

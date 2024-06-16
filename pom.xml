@@ -13,7 +13,7 @@
 
   <groupId>com.io7m.xoanon</groupId>
   <artifactId>com.io7m.xoanon</artifactId>
-  <version>1.0.1</version>
+  <version>2.0.0</version>
 
   <packaging>pom</packaging>
   <name>com.io7m.xoanon</name>
@@ -30,13 +30,13 @@
 
   <properties>
     <!-- Configuration. -->
-    <io7m.api.previousVersion>1.0.0</io7m.api.previousVersion>
-    <io7m.java.targetJavaVersion>17</io7m.java.targetJavaVersion>
+    <io7m.api.previousVersion>1.0.1</io7m.api.previousVersion>
+    <io7m.java.targetJavaVersion>21</io7m.java.targetJavaVersion>
 
     <!-- Third-party dependencies. -->
-    <jqwik.version>1.8.4</jqwik.version>
+    <jqwik.version>1.8.5</jqwik.version>
     <junit.version>5.10.2</junit.version>
-    <org.javafx.version>21.0.3</org.javafx.version>
+    <org.javafx.version>23-ea+22</org.javafx.version>
   </properties>
 
   <licenses>

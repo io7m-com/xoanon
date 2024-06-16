@@ -44,6 +44,8 @@ public final class XCommanders
   public static CompletableFuture<XCCommanderType> boot()
   {
     final var future = new CompletableFuture<XCCommanderType>();
+    checkSafety(future);
+
     Platform.setImplicitExit(false);
     Platform.startup(() -> {
       try {
@@ -53,6 +55,16 @@ public final class XCommanders
       }
     });
     return future;
+  }
+
+  private static void checkSafety(
+    final CompletableFuture<XCCommanderType> future)
+  {
+    try {
+      XCommanderDisplaySafety.checkDisplayPermitted(System.getenv());
+    } catch (final Throwable e) {
+      future.completeExceptionally(e);
+    }
   }
 }
 

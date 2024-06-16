@@ -19,7 +19,7 @@
  */
 
 @Export
-@Version("1.0.1")
+@Version("2.0.0")
 package com.io7m.xoanon.commander;
 
 import org.osgi.annotation.bundle.Export;
