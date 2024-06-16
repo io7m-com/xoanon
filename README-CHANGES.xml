@@ -15,15 +15,16 @@
         </c:change>
       </c:changes>
     </c:release>
-    <c:release date="2024-06-16T14:28:54+00:00" is-open="true" ticket-system="com.github.io7m.xoanon" version="2.0.0">
+    <c:release date="2024-06-16T14:49:53+00:00" is-open="false" ticket-system="com.github.io7m.xoanon" version="2.0.0">
       <c:changes>
+        <c:change date="2024-05-27T00:00:00+00:00" summary="Update jqwik.version:1.8.4 → 1.8.5."/>
         <c:change date="2024-06-16T00:00:00+00:00" summary="Require JDK 21."/>
         <c:change date="2024-06-16T00:00:00+00:00" summary="Add &quot;display safety&quot;.">
           <c:tickets>
             <c:ticket id="19"/>
           </c:tickets>
         </c:change>
-        <c:change date="2024-06-16T14:28:54+00:00" summary="Improve xoanon layout for small screens."/>
+        <c:change date="2024-06-16T00:00:00+00:00" summary="Improve xoanon layout for small screens."/>
       </c:changes>
     </c:release>
   </c:releases>
