@@ -36,7 +36,7 @@
     <!-- Third-party dependencies. -->
     <jqwik.version>1.9.2</jqwik.version>
     <junit.version>5.11.4</junit.version>
-    <org.javafx.version>23-ea+22</org.javafx.version>
+    <org.javafx.version>23.0.2</org.javafx.version>
   </properties>
 
   <licenses>
